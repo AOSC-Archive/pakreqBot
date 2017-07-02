@@ -73,7 +73,7 @@ class PAKREQBOT
   end
 
   def self.add_pkg(pkgname,homepage)
-    @@db.execute("INSERT INTO pakreq (pkgname,homepage,packager)
+    @@db.execute("INSERT INTO pakreq (pkgname,description,packager)
                    VALUES (?,?,?)",[pkgname,homepage,nil])
   end
 
@@ -87,18 +87,18 @@ class PAKREQBOT
 
   def self.new_pakreq(message)
     message = message.split(pattern=" ")
-    if message.length > 3
-      return "無效的請求，正確格式爲 `/pakreq@pakreqBot <包名> <官方網址>`"
-    else
-      pkglist = @@db.execute("SELECT * FROM pakreq")
-      pkglist.map do |arr|
-        if message[1] == arr[1] or message[2] == arr[2]
-          return "#{message[1]} 已在列隊中。"
-        end
+    pkglist = @@db.execute("SELECT * FROM pakreq")
+    pkglist.map do |arr|
+      if message[1] == arr[0]
+        return "#{message[1]} 已在列隊中。"
       end
-      self.add_pkg(message[1],message[2])
-      return "添加成功。\n#{self.list_pkg}"
     end
+    response = ""
+    for num in 2..message.length do
+      response = response + "#{message[num]} "
+    end
+    self.add_pkg(message[1],response.chop)
+    return "添加成功。\n#{self.list_pkg}"
   end
 
   def self.list_pkg
@@ -106,14 +106,14 @@ class PAKREQBOT
     if pkglist == []
       return "沒有未完成的 pakreq。"
     else
-      response = "以下爲所有未完成的 pakreq（包名: 鏈接 - 打包者）：\n"
+      response = "以下爲所有未完成的 pakreq（包名: 描述 - 打包者）：\n"
       pkglist.map do |arr|
-        if arr[3] == nil
+        if arr[2] == nil
           packager = "暫未認領"
         else
-          packager = "@#{arr[3]}"
+          packager = "@#{arr[2]}"
         end
-        response = response + "#{arr[1]}: #{arr[2]} - #{packager}\n"
+        response = response + "#{arr[0]}: #{arr[1]}- #{packager}\n"
       end
       return response
     end
@@ -126,7 +126,7 @@ class PAKREQBOT
     else
       pkglist = @@db.execute("SELECT * FROM pakreq")
       pkglist.map do |arr|
-        if message[1] == arr[1]
+        if message[1] == arr[0]
           self.update_packager_info(message[1],user)
           return "認領成功。\n#{self.list_pkg}"
         end
@@ -142,7 +142,7 @@ class PAKREQBOT
     else
       pkglist = @@db.execute("SELECT * FROM pakreq")
       pkglist.map do |arr|
-        if message[1] == arr[1]
+        if message[1] == arr[0]
           self.delete_request(message[1])
           return "已標記完成。\n#{self.list_pkg}"
         end
@@ -158,7 +158,7 @@ class PAKREQBOT
     when /\/help/
       response = "一個簡單的果凍處決 Bot\n"
       response = response + "命令列表：\n"
-      response = response + "`/pakreq@pakreqBot <包名> <官方網址>` - 添加一個新的 pakreq\n"
+      response = response + "`/pakreq@pakreqBot <包名> <描述>` - 添加一個新的 pakreq\n"
       response = response + "`/list@pakreqBot <包名>` - 列出所有未完成的 pakreq\n"
       response = response + "`/claim@pakreqBot <包名>` - 認領這個 pakreq\n"
       response = response + "`/done@pakreqBot <包名>` - 標記這個 pakreq 已完成\n"

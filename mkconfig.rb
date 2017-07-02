@@ -16,7 +16,7 @@ if !(File.exist?("database.db"))
   db = SQLite3::Database.new("database.db")
   puts "done"
   db.execute("DROP TABLE IF EXISTS pakreq")
-  db.execute("CREATE TABLE pakreq(pkgname,homepage,packager)")
+  db.execute("CREATE TABLE pakreq(pkgname,description,packager)")
 else
   puts "Database exists, skipping..."
 end
