@@ -72,9 +72,9 @@ class PAKREQBOT
     @@db = SQLite3::Database.open("database.db")
   end
 
-  def self.add_pkg(pkgname,homepage)
-    @@db.execute("INSERT INTO pakreq (pkgname,description,packager)
-                   VALUES (?,?,?)",[pkgname,homepage,nil])
+  def self.add_pkg(pkgname,homepage,requester)
+    @@db.execute("INSERT INTO pakreq (pkgname,description,packager,requester)
+                   VALUES (?,?,?,?)",[pkgname,homepage,nil,requester])
   end
 
   def self.update_packager_info(pkgname,packager)
@@ -85,7 +85,7 @@ class PAKREQBOT
     @@db.execute("DELETE FROM pakreq WHERE pkgname=?",[pkgname])
   end
 
-  def self.new_pakreq(message)
+  def self.new_pakreq(message,requester)
     message = message.split(pattern=" ")
     pkglist = @@db.execute("SELECT * FROM pakreq")
     pkglist.map do |arr|
@@ -97,7 +97,7 @@ class PAKREQBOT
     for num in 2..message.length do
       response = response + "#{message[num]} "
     end
-    self.add_pkg(message[1],response.chop)
+    self.add_pkg(message[1],response.chop,requester)
     return "添加成功。\n#{self.list_pkg}"
   end
 
@@ -106,14 +106,14 @@ class PAKREQBOT
     if pkglist == []
       return "沒有未完成的 pakreq。"
     else
-      response = "以下爲所有未完成的 pakreq（包名: 描述 - 打包者）：\n"
+      response = "以下爲所有未完成的 pakreq（包名: 描述 - 打包者 By 提交者）：\n"
       pkglist.map do |arr|
         if arr[2] == nil
           packager = "暫未認領"
         else
           packager = "@#{arr[2]}"
         end
-        response = response + "#{arr[0]}: #{arr[1]}- #{packager}\n"
+        response = response + "#{arr[0]}: #{arr[1]}- #{packager} By @#{arr[3]}\n"
       end
       return response
     end
@@ -165,7 +165,7 @@ class PAKREQBOT
       response = response + "`/help@pakreqBot` - 查看此幫助信息"
       return response
     when /\/pakreq/
-      response = self.new_pakreq(message.text)
+      response = self.new_pakreq(message.text,message.from.username)
       return response
     when /\/list/
       response = self.list_pkg
