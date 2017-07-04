@@ -214,18 +214,18 @@ class PAKREQBOT
       users = @@db.execute("SELECT * FROM users")
       users.map do |arr|
         if arr[0] == arr[0]
-          return "發送 `/help` 以查看幫助信息 1"
+          return "發送 `/help` 以查看幫助信息"
         else
           self.register_user(user_id)
           self.update_user_session_status(user_id,true)
-          return "發送 `/help` 以查看幫助信息 2"
+          return "發送 `/help` 以查看幫助信息"
         end
       end
       self.register_user(user_id)
       self.update_user_session_status(user_id,true)
-      return "發送 `/help` 以查看幫助信息 3"
+      return "發送 `/help` 以查看幫助信息"
     end
-    return "發送 `/help` 以查看幫助信息 4"
+    return "發送 `/help` 以查看幫助信息"
   end
 
   def self.message_parser(message)
