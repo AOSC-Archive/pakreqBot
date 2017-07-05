@@ -121,17 +121,17 @@ class PAKREQBOT
         return "#{message[1]} 已在列隊中。",nil
       end
     end
-    response = ""
+    description = ""
     if message.length > 2
       for num in 2..message.length do
-        response = response + "#{message[num]} "
+        description = description + "#{message[num]} "
       end
     else
-      response = "描述爲空"
+      description = "描述爲空"
     end
-    self.add_pkg(message[1],response,requester)
+    self.add_pkg(message[1],description,requester)
     notification = "有新的 pakreq：\n"
-    notification = notification + "**#{message[1]}** - #{response}By @#{requester}"
+    notification = notification + "**#{message[1]}** - #{description}By @#{requester}"
     return "添加成功。\n#{self.list_pkg}",notification
   end
 
@@ -159,7 +159,7 @@ class PAKREQBOT
       return "使用方法： /claim@pakreqBot <包名>",nil
     end
     if message.length > 2
-      return "無效的請求，正確格式： `/claim@pakreqBot <要認領的包名>`",nil
+      return "無效的請求，正確格式： /claim@pakreqBot <要認領的包名>",nil
     else
       pkglist = @@db.execute("SELECT * FROM pakreq")
       pkglist.map do |arr|
@@ -179,7 +179,7 @@ class PAKREQBOT
       return "使用方法： /done@pakreqBot <包名>",nil
     end
     if message.length > 2
-      return "無效的請求，正確格式： `/done@pakreqBot <完成的包名>`",nil
+      return "無效的請求，正確格式： /done@pakreqBot <完成的包名>",nil
     else
       pkglist = @@db.execute("SELECT * FROM pakreq")
       pkglist.map do |arr|
@@ -197,7 +197,7 @@ class PAKREQBOT
     users = @@db.execute("SELECT * FROM users")
     users.map do |arr|
       if user_id == arr[0] and arr[2] == 1
-        return "已經訂閱，無需重複訂閱。輸入 `/unsubscribe@pakreqBot` 以退訂"
+        return "已經訂閱，無需重複訂閱。輸入 /unsubscribe@pakreqBot 以退訂"
       elsif user_id == arr[0] and arr[2] != 1
         self.update_user_subscribe_status(user_id,true)
         return "訂閱成功！"
@@ -228,18 +228,18 @@ class PAKREQBOT
       users = @@db.execute("SELECT * FROM users")
       users.map do |arr|
         if arr[0] == arr[0]
-          return "發送 `/help` 以查看幫助信息"
+          return "發送 /help 以查看幫助信息"
         else
           self.register_user(user_id)
           self.update_user_session_status(user_id,true)
-          return "發送 `/help` 以查看幫助信息"
+          return "發送 /help 以查看幫助信息"
         end
       end
       self.register_user(user_id)
       self.update_user_session_status(user_id,true)
-      return "發送 `/help` 以查看幫助信息"
+      return "發送 /help 以查看幫助信息"
     end
-    return "發送 `/help` 以查看幫助信息"
+    return "發送 /help 以查看幫助信息"
   end
 
   def self.message_parser(message)
@@ -250,13 +250,13 @@ class PAKREQBOT
     when /\/help/
       response = "一個簡單的果凍處決 Bot\n"
       response = response + "命令列表：\n"
-      response = response + "`/pakreq@pakreqBot <包名> <描述>` - 添加一個新的 pakreq\n"
-      response = response + "`/claim@pakreqBot <包名>` - 認領這個 pakreq\n"
-      response = response + "`/done@pakreqBot <包名>` - 標記這個 pakreq 已完成\n"
-      response = response + "`/list@pakreqBot` - 列出所有未完成的 pakreq\n"
-      response = response + "`/subscribe@pakreqBot` - 在 pakreq 狀態有更新時得到提醒（訂閱）\n"
-      response = response + "`/unsubcribe@pakreqBot` - 關閉提醒（退訂）\n"
-      response = response + "`/help@pakreqBot` - 查看此幫助信息"
+      response = response + "/pakreq@pakreqBot <包名> <描述> - 添加一個新的 pakreq\n"
+      response = response + "/claim@pakreqBot <包名> - 認領這個 pakreq\n"
+      response = response + "/done@pakreqBot <包名> - 標記這個 pakreq 已完成\n"
+      response = response + "/list@pakreqBot - 列出所有未完成的 pakreq\n"
+      response = response + "/subscribe@pakreqBot - 在 pakreq 狀態有更新時得到提醒（訂閱）\n"
+      response = response + "/unsubcribe@pakreqBot - 關閉提醒（退訂）\n"
+      response = response + "/help@pakreqBot - 查看此幫助信息"
       return response,nil
     when /\/pakreq/
       response = self.new_pakreq(message.text,message.from.username)
@@ -291,13 +291,13 @@ class PAKREQBOT
         @@logger.info("Got a message from @#{message.from.username}: #{message.text}")
         response = self.message_parser(message)
         if response[0] != nil
-          bot.api.send_message(chat_id: message.chat.id, text: response[0], parse_mode: "markdown")
+          bot.api.send_message(chat_id: message.chat.id, text: response[0])
         end
         if response[1] != nil
           users = @@db.execute("SELECT * FROM users")
           users.map do |arr|
             if arr[1] == 1 and arr[2] == 1 and arr[0] != message.chat.id
-              bot.api.send_message(chat_id: arr[0], text: response[1], parse_mode: "markdown")
+              bot.api.send_message(chat_id: arr[0], text: response[1])
             end
           end
         end
