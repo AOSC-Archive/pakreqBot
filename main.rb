@@ -111,7 +111,10 @@ class PAKREQBOT
   end
 
   def self.new_pakreq(message,requester)
-    message = message.split(pattern=" ")
+    message = message.split
+    if message.length < 2
+      return "使用方法： /pakreq@pakreqBot <包名> <描述（可選）>"
+    end
     pkglist = @@db.execute("SELECT * FROM pakreq")
     pkglist.map do |arr|
       if message[1] == arr[0]
@@ -119,8 +122,12 @@ class PAKREQBOT
       end
     end
     response = ""
-    for num in 2..message.length do
-      response = response + "#{message[num]} "
+    if message.length > 2
+      for num in 2..message.length do
+        response = response + "#{message[num]} "
+      end
+    else
+      response = "描述爲空"
     end
     self.add_pkg(message[1],response,requester)
     notification = "有新的 pakreq：\n"
@@ -147,7 +154,10 @@ class PAKREQBOT
   end
 
   def self.claim_pkg(message,user)
-    message = message.split(pattern=" ")
+    message = message.split
+    if message.length < 2
+      return "使用方法： /claim@pakreqBot <包名>"
+    end
     if message.length > 2
       return "無效的請求，正確格式： `/claim@pakreqBot <要認領的包名>`",nil
     else
@@ -165,6 +175,9 @@ class PAKREQBOT
 
   def self.mark_done(message)
     message = message.split(pattern=" ")
+    if message.length < 2
+      return "使用方法： /done@pakreqBot <包名>"
+    end
     if message.length > 2
       return "無效的請求，正確格式： `/done@pakreqBot <完成的包名>`",nil
     else
@@ -237,9 +250,9 @@ class PAKREQBOT
       response = "一個簡單的果凍處決 Bot\n"
       response = response + "命令列表：\n"
       response = response + "`/pakreq@pakreqBot <包名> <描述>` - 添加一個新的 pakreq\n"
-      response = response + "`/list@pakreqBot <包名>` - 列出所有未完成的 pakreq\n"
       response = response + "`/claim@pakreqBot <包名>` - 認領這個 pakreq\n"
       response = response + "`/done@pakreqBot <包名>` - 標記這個 pakreq 已完成\n"
+      response = response + "`/list@pakreqBot` - 列出所有未完成的 pakreq\n"
       response = response + "`/subscribe@pakreqBot` - 在 pakreq 狀態有更新時得到提醒（訂閱）\n"
       response = response + "`/unsubcribe@pakreqBot` - 關閉提醒（退訂）\n"
       response = response + "`/help@pakreqBot` - 查看此幫助信息"
@@ -265,6 +278,8 @@ class PAKREQBOT
     when /\/stop/
       self.unregister_user(message.from.id)
       return response,nil
+    else
+      return nil,nil
     end
   end
 
