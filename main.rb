@@ -113,7 +113,7 @@ class PAKREQBOT
   def self.new_pakreq(message,requester)
     message = message.split
     if message.length < 2
-      return "使用方法： /pakreq@pakreqBot <包名> <描述（可選）>"
+      return "使用方法： /pakreq@pakreqBot <包名> <描述（可選）>",nil
     end
     pkglist = @@db.execute("SELECT * FROM pakreq")
     pkglist.map do |arr|
@@ -156,7 +156,7 @@ class PAKREQBOT
   def self.claim_pkg(message,user)
     message = message.split
     if message.length < 2
-      return "使用方法： /claim@pakreqBot <包名>"
+      return "使用方法： /claim@pakreqBot <包名>",nil
     end
     if message.length > 2
       return "無效的請求，正確格式： `/claim@pakreqBot <要認領的包名>`",nil
@@ -176,7 +176,7 @@ class PAKREQBOT
   def self.mark_done(message)
     message = message.split(pattern=" ")
     if message.length < 2
-      return "使用方法： /done@pakreqBot <包名>"
+      return "使用方法： /done@pakreqBot <包名>",nil
     end
     if message.length > 2
       return "無效的請求，正確格式： `/done@pakreqBot <完成的包名>`",nil
@@ -206,6 +206,7 @@ class PAKREQBOT
     if user_id != chat_id
       return "由於 Telegram 限制，Bot 無法主動創建會話，請在開始會話後重新訂閱。"
     else
+      self.register_user(user_id)
       self.update_user_subscribe_status(user_id,true)
       return "訂閱成功！"
     end
