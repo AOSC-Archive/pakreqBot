@@ -54,7 +54,11 @@ build-iPhoneSimulator/
 config.yml
 
 # Log files
-/logs/
+/logs/*
+logs/*
+logs
 
 # Database
-database.db
+/data/*
+data/*
+data

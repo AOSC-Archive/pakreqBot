@@ -8,17 +8,21 @@
 # terms of the Do What The Fuck You Want To Public License, Version 2,
 # as published by Sam Hocevar. See the LICENSE file for more details.
 
-require 'sqlite3'
+require 'rbconfig'
+require_relative '../libs/database.rb'
+
+Dir.chdir("..")
 
 puts "Initializing database..."
 
-if !(File.exist?("database.db"))
-  db = SQLite3::Database.new("database.db")
-  puts "done"
-  db.execute("DROP TABLE IF EXISTS pakreq")
-  db.execute("DROP TABLE IF EXISTS users")
-  db.execute("CREATE TABLE pakreq(pkgname,description,packager,requester)")
-  db.execute("CREATE TABLE users(id,session,subscribe)")
+if RbConfig::CONFIG['target_os'] == 'mswin32'
+  slash = "\\"
+else
+  slash = "/"
+end
+
+if !(File.exist?("data#{slash}database.db"))
+  Database.initialize_database
 else
   puts "Database exists, skipping..."
 end
@@ -36,7 +40,7 @@ end
 
 puts "Creating config file..."
 
-configfile = File.new('config.yml','w+')
+configfile = File.new("config.yml",'w+')
 
 if configfile
   configfile.syswrite("bot:\n")
