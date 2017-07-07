@@ -584,12 +584,19 @@ class PAKREQBOT
       response = self.user_start(message.from.id,message.from.username,message.chat.id)
       return response,nil
     when /\/help/
-      response = "一個簡單的果凍處決 Bot\n"
+      response = "果凍處決特化型 Bot\n"
       response = response + "命令列表：\n"
-      response = response + "/pakreq@pakreqBot <包名> <描述> - 添加一個新的 pakreq\n"
-      response = response + "/claim@pakreqBot <包名>（或不加參數以隨機認領一個請求）\n"
+      response = response + "/pakreq@pakreqBot <包名> <描述> - 添加一個新的 pakreq。\n"
+      response = response + "/updreq@pakreqBot <包名> <描述> - 添加一個新的 updreq。\n"
+      response = response + "/optreq@pakreqBot <包名> <描述> - 添加一個新的 optreq。\n"
+      response = response + "/claim@pakreqBot <包名> - 認領一個請求（或不加參數以隨便認領一個請求）。\n"
+      response = response + "/unclaim@pakreqBot <包名> - 取消認領一個請求。\n"
       response = response + "/done@pakreqBot <包名> - 標記這個 pakreq 已完成，必須由打包者執行。\n"
-      response = response + "/list@pakreqBot - 列出所有未完成的 pakreq\n"
+      response = response + "/set_efd@pakreqBot <包名> <日期> - 設置預期的完成日期（其實 Bot 並不會檢查是否遵守格式 XD）。\n"
+      response = response + "/reject@pakreqBot <包名> <原因> - 拒絕一個請求。\n"
+      response = response + "/list@pakreqBot <包名（可選）>- 列出所有未完成的請求（加上包名即顯示請求具體信息）\n"
+      response = response + "/dlist@pakreqBot <包名（可選）>- 列出所有已完成的請求（加上包名即顯示請求具體信息）\n"
+      response = response + "/rlist@pakreqBot <包名（可選）>- 列出所有已拒絕的請求（加上包名即顯示請求具體信息）\n"
       response = response + "/subscribe@pakreqBot - 在 pakreq 狀態有更新時得到提醒（訂閱）\n"
       response = response + "/unsubcribe@pakreqBot - 關閉提醒（退訂）\n"
       response = response + "/help@pakreqBot - 查看此幫助信息"
