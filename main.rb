@@ -468,6 +468,9 @@ class PAKREQBOT
             when 3
               category = "optreq"
             end
+            if reason.split == []
+              reason = "未知"
+            end
             notification = "#{category} #{message[1]} 已被 @#{packager_username} 拒絕。\n"
             notification = notification + "理由是： #{reason}"
             notification_requester = Array[arr[6],"您的 "+notification]
