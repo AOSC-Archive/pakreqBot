@@ -219,13 +219,11 @@ module Database
         if arr[0] == id
           return true
         end
-        end
-    else
-      db.execute("INSERT INTO users (id,username,admin,session,subscribe,ban)
-                    VALUES (?,?,?,?,?,?)",[id,username,0,0,0,0])
-      return true
+      end
     end
-    return false
+    db.execute("INSERT INTO users (id,username,admin,session,subscribe,ban)
+                  VALUES (?,?,?,?,?,?)",[id,username,0,0,0,0])
+    return true
   end
 
   def self.user_set(db,column,id,boolean)

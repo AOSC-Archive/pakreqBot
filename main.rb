@@ -504,26 +504,26 @@ class PAKREQBOT
           return "由於 Telegram 限制，Bot 無法主動創建會話，請先與 Bot 創建會話並重試。如果已創建會話，請在會話中輸入 /start 以創建記錄。"
         end
       end
+    end
+    if user_id != chat_id
+      return "由於 Telegram 限制，Bot 無法主動創建會話，請先與本 Bot 創建會話並重試。如果已創建會話，請在會話中輸入 /start 以創建記錄。"
     else
-      if user_id != chat_id
-        return "由於 Telegram 限制，Bot 無法主動創建會話，請先與本 Bot 創建會話並重試。如果已創建會話，請在會話中輸入 /start 以創建記錄。"
+      status = Database.user_reg(@@db,user_id,user_username)
+      if status == false
+        return "用戶登記失敗，請聯繫 @TheSaltedFish"
+      end
+      status = Database.user_set(@@db,"session",user_id,true)
+      if status == false
+        return "用戶會話狀態登記失敗，請聯繫 @TheSaltedFish"
+      end
+      status = Database.user_set(@@db,"subscribe",user_id,true)
+      if status == true
+        return "訂閱成功！"
       else
-        status = Database.user_reg(@@db,user_id,user_username)
-        if status == false
-          return "用戶登記失敗，請聯繫 @TheSaltedFish"
-        end
-        status = Database.user_set(@@db,"session",user_id,true)
-        if status == false
-          return "用戶會話狀態登記失敗，請聯繫 @TheSaltedFish"
-        end
-        status = Database.user_set(@@db,"subscribe",user_id,true)
-        if status == true
-          return "訂閱成功！"
-        else
-          return "訂閱失敗，請聯繫 @TheSaltedFish"
-        end
+        return "訂閱失敗，請聯繫 @TheSaltedFish"
       end
     end
+    return "訂閱失敗，未知錯誤，請聯繫 @TheSaltedFish"
   end
 
   def self.user_unsubscribe(user_id)
@@ -660,23 +660,23 @@ class PAKREQBOT
       bot.listen do |message|
         @@logger.info("Got a message from @#{message.from.username}: #{message.text}")
         response = self.message_parser(message)
-        if (response[0] != nil) and (response[0] != [])
+        if !(response[0] == nil) and !(response[0] == [])
           bot.api.send_message(chat_id: message.chat.id, text: response[0], reply_to_message_id: message.message_id)
         end
-        if (response[1] != nil) and (response[1] != [])
+        if !(response[1] == nil) and !(response[1] == [])
           users = Database.user_list(@@db)
           if users[1] == false
             @@logger.error("Cannot load user list.")
           end
-          if (users[0] != []) and (users[0] != nil)
+          if !(users[0] == []) and !(users[0] == nil)
             users[0].map do |arr|
-              if (response[1] != nil) and (arr[3] == 1) and (arr[4] == 1) and (arr[0] != message.chat.id) and (arr[0] != response[2][0])
+              if !(response[1] == nil) and (arr[3] == 1) and (arr[4] == 1) and !(arr[0] == message.chat.id) and !(arr[0] == response[2][0])
                 bot.api.send_message(chat_id: arr[0], text: response[1])
               end
             end
           end
         end
-        if (response[2] != nil) and (response[2] != []) and (response[2][0] != message.chat.id)
+        if !(response[2] == nil) and !(response[2] == []) and !(response[2][0] == message.chat.id)
           bot.api.send_message(chat_id: response[2][0],text: response[2][1])
         end
       end
