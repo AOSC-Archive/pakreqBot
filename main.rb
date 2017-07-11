@@ -684,4 +684,6 @@ class PAKREQBOT
   end
 end
 
-PAKREQBOT.start
+loop do
+  PAKREQBOT.start
+end
