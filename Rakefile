@@ -2,7 +2,7 @@ task default: %w[run]
 
 task :run do
   Dir.chdir('.') do
-    ruby "main.rb"
+    sh "sh start.sh"
   end
 end
 

@@ -67,9 +67,9 @@ class PAKREQBOT
     else
       slash = "/"
     end
-    Dir::mkdir("logs") if !(File.directory?("logs"))
     if config["bot"]["write_log_to_file"] == true
-      filename = "logs#{slash}bot_#{time.year}_#{time.yday}_#{time.hour}#{time.min}#{time.sec}.log"
+      Dir::mkdir("logs") if !(File.directory?("logs"))
+      filename = "logs#{slash}bot_#{time.year}_#{time.yday}_#{time.hour}:#{time.min}:#{time.sec}.log"
       logfile = File.open(filename,"w+")
       @@logger = Logger.new MultiDelegator.delegate(:write, :close).to(STDOUT, logfile)
       @@logger.info("Logging to file \"#{filename}\"")
@@ -79,21 +79,23 @@ class PAKREQBOT
       @@logger.info("Cannot open database, aborting...")
       exit
     end
+    @@logger.info("Bot started...")
   end
 
   def self.new_pakreq(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "使用方法： /pakreq@pakreqBot <包名> <描述（可選）>",nil,nil
+      return "Usage: /pakreq@pakreqBot <package name> <description(optional)>",nil,nil
     end
     if (Packages_API.api_queue_pkg(message[1]) == false)
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
-        return "數據庫讀取失敗，請聯繫 @TheSaltedFish",nil,nil
+        @@logger.error("Unable to read database \"req\".")
+        return "Unable to read database, please contact the administrators.",nil,nil
       end
       pkglist[0].map do |arr|
         if message[1] == arr[0]
-          return "#{message[1]} 已在列隊中。",nil,nil
+          return "#{message[1]} already in the list.",nil,nil
         end
       end
       description = ""
@@ -102,33 +104,35 @@ class PAKREQBOT
           description = description + "#{message[num]} "
         end
       else
-        description = "描述爲空"
+        description = "<No description> "
       end
       time = Time.new
       status = Database.pkg_add(@@db,"req",message[1],description,1,nil,nil,requester_username,requester_id,"#{time.getutc}",nil,nil)
       if status == false
         @@logger.error("Cannot add pakreq \"#{message[1]}\"")
       end
-      notification = "有新的 pakreq：\n"
-      notification = notification + "#{message[1]} - #{description}By @#{requester_username}"
-      return "添加成功。\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+      notification = "A new pakreq:\n"
+      notification = notification + "#{message[1]} - #{description}by @#{requester_username}"
+      @@logger.info("A new pakreq: #{message[1]} - #{description}by @#{requester_username}")
+      return "Successfully added #{message[1]} to the pending list.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
     else
-      return "源中已存在此包，無需重新請求。",nil,nil
+      return "#{message[1]} already in the source.",nil,nil
     end
   end
 
   def self.new_updreq(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "使用方法： /updreq@pakreqBot <包名> <描述（可選）>",nil,nil
+      return "Usage: /updreq@pakreqBot <package name> <description(optional)>",nil,nil
     end
     pkglist = Database.pkg_list(@@db,"req")
     if pkglist[1] == false
-      return "數據庫讀取失敗，請聯繫 @TheSaltedFish",nil,nil
+      @@logger.error("Unable to read database \"req\".")
+      return "Unable to read database, please contact the administrators.",nil,nil
     end
     pkglist[0].map do |arr|
       if message[1] == arr[0]
-        return "#{message[1]} 已在列隊中。",nil,nil
+        return "#{message[1]} already in the list.",nil,nil
       end
     end
     description = ""
@@ -137,30 +141,33 @@ class PAKREQBOT
         description = description + "#{message[num]} "
       end
     else
-      description = "描述爲空"
+      description = "<No description> "
     end
     time = Time.new
     status = Database.pkg_add(@@db,"req",message[1],description,2,nil,nil,requester_username,requester_id,"#{time.getutc}",nil,nil)
     if status == false
       @@logger.error("Cannot add pakreq \"#{message[1]}\"")
+      return "Failed to add a new pakareq. Please contact the administrators."
     end
-    notification = "有新的 updreq：\n"
-    notification = notification + "#{message[1]} - #{description}By @#{requester_username}"
-    return "添加成功。\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+    notification = "A new updreq:\n"
+    notification = notification + "#{message[1]} - #{description}by @#{requester_username}"
+    @@logger.info("A new updreq: #{message[1]} - #{description}by @#{requester_username}")
+    return "Successfully added to the pending list.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
   end
 
   def self.new_optreq(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "使用方法： /optreq@pakreqBot <包名> <描述（可選）>",nil,nil
+      return "Usage: /optreq@pakreqBot <package name> <description(optional)>",nil,nil
     end
     pkglist = Database.pkg_list(@@db,"req")
     if pkglist[1] == false
-      return "數據庫讀取失敗，請聯繫 @TheSaltedFish",nil,nil
+      @@logger.error("Unable to read database \"req\".")
+      return "Unable to read database, please contact the administrators.",nil,nil
     end
     pkglist[0].map do |arr|
       if message[1] == arr[0]
-        return "#{message[1]} 已在列隊中。",nil,nil
+        return "#{message[1]} already in the list.",nil,nil
       end
     end
     description = ""
@@ -169,42 +176,44 @@ class PAKREQBOT
         description = description + "#{message[num]} "
       end
     else
-      description = "描述爲空"
+      description = "<No description>"
     end
     time = Time.new
     status = Database.pkg_add(@@db,"req",message[1],description,3,nil,nil,requester_username,requester_id,"#{time.getutc}",nil,nil)
     if status == false
       @@logger.error("Cannot add pakreq \"#{message[1]}\"")
     end
-    notification = "有新的 optreq：\n"
+    notification = "A new optreq:\n"
     notification = notification + "#{message[1]} - #{description}By @#{requester_username}"
-    return "添加成功。\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+    @@logger.info("A new optreq: #{message[1]} - #{description}by @#{requester_username}")
+    return "Successfully added to the list.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
   end
 
   def self.list_pkg(message,table)
     message = message.split
     pkglist = Database.pkg_list(@@db,table)
     if pkglist[1] == false
-      return "數據庫讀取失敗，請聯繫 @TheSaltedFish"
+      @@logger.error("Unable to read database.")
+      return "Unable to read database, please contact the administrators."
     end
     if pkglist[0] == []
       case table
       when "req"
-        return "沒有未完成的请求。"
+        return "No pending requests yet."
       when "done"
-        return "没有已完成的请求。"
+        return "No done requests yet."
       when "rejected"
-        return "没有已拒绝的请求。"
+        return "No rejected requests yet."
       end
     else
       if message.length < 2
         case table
         when "req"
-          response = "以下爲所有未完成的請求（包名（類型）: 描述）：\n"
+          response = "Pending requests:\n"
         when "done"
-          response = "以下为所有已完成的请求（包名（類型）：描述）：\n"
+          response = "Done requests:\n"
         when "rejected"
-          response = "以下为所有已拒绝的请求（包名（類型）：描述）：\n"
+          response = "Rejected requests:\n"
         end
         pkglist[0].map do |arr|
           case arr[2]
@@ -222,13 +231,18 @@ class PAKREQBOT
         pkglist[0].map do |arr|
           if arr[0] == message[1]
             if (arr[4] == nil)
-              packager = "暫未認領"
+              packager = "<Nobody>"
             else
               if arr[3] == nil
                 packager = "ID: ##{arr[4]}"
               else
-                packager = "@#{arr[5]}(#{arr[4]})"
+                packager = "@#{arr[3]}(#{arr[4]})"
               end
+            end
+            if arr[5] == nil
+              requester = "ID: ##{arr[6]}"
+            else
+              requester = "@#{arr[5]}(#{arr[6]})"
             end
             case arr[2]
             when 1
@@ -238,25 +252,29 @@ class PAKREQBOT
             when 3
               category = "optreq"
             end
-            response = "以下爲請求 #{message[1]} 的具體信息：\n"
-            response = response + "包名： #{arr[0]}\n"
-            response = response + "描述： #{arr[1]}\n"
-            response = response + "類型： #{category}\n"
-            response = response + "打包者： #{packager}\n"
-            response = response + "提交者： @#{arr[5]}(#{arr[6]})\n"
-            if table == "req"
-              date = "提交日期"
-            else
-              date = "處理日期"
-            end
-            response = response + "#{date}： #{arr[7]}\n"
+            response = "Details of #{message[1]}:\n"
+            response = response + "Package name: #{arr[0]}\n"
+            response = response + "Description: #{arr[1]}\n"
+            response = response + "Type: #{category}\n"
+            response = response + "Packager: #{packager}\n"
+            response = response + "Requeser: #{requester}\n"
+            response = response + "Date: #{arr[7]}\n"
             if table == "req"
               if arr[8] == nil
-                expected_finishing_date = "未知"
+                expected_finishing_date = "<Unknown>"
               else
                 expected_finishing_date = "#{arr[8]}"
               end
-              response = response + "預計完成日期： #{expected_finishing_date}"
+              response = response + "Estimate date: #{expected_finishing_date}"
+            end
+            if table == "rejected"
+              @@logger.info("\"#{arr[8]}\"")
+              if (arr[8] == nil) or (arr[8] == "nil") or (arr[8] == "") or (arr[8] == " ")
+                reason = "<Unknown>"
+              else
+                reason = arr[8]
+              end
+              response = response + "Reason: #{reason}"
             end
           end
         end
@@ -270,14 +288,16 @@ class PAKREQBOT
     if message.length < 2
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
-        return "無法讀取數據庫，請聯繫 @TheSaltedFish",nil,nil
+        @@logger.error("Unable to read database.")
+        return "Unable to read database, please contact the administrators.",nil,nil
       end
       if (pkglist[0] != nil) or (pkglist[0] != [])
         pkglist[0].map do |arr|
           if (arr[4] == nil) or (arr[4] == "nil") or (arr[4] == [])
             status = Database.pkg_claim(@@db,arr[0],packager_username,packager_id)
             if status == false
-              return "認領失敗，請聯繫 @TheSaltedFish",nil,nil
+              @@logger.error("Failed to claim request #{arr[0]}.")
+              return "Failed while claiming package, please contact the administrators.",nil,nil
             else
               case arr[2]
               when 1
@@ -287,28 +307,35 @@ class PAKREQBOT
               when 3
                 category = "optreq"
               end
-              notification = "#{category} #{arr[0]} 已被 @#{packager_username} 認領。"
-              notification_requester = Array[arr[6],"您的 "+notification]
-              return "認領成功。\n#{self.list_pkg("/list@pakreqBot #{arr[0]}","req")}",notification,notification_requester
+              if (packager_username == nil)
+                packager = "ID: ##{packager_id}"
+              else
+                packager = "@#{packager_username}(#{packager_id})"
+              end
+              notification = "#{category} #{arr[0]} claimed by #{packager}."
+              notification_requester = Array[arr[6],"Your "+notification]
+              return "Successfully claimed request \"#{arr[0]}\"\n#{self.list_pkg("/list@pakreqBot #{arr[0]}","req")}",notification,notification_requester
             end
           end
         end
       else
-        return "沒有未被認領的 pakreq。",nil,nil
+        return "No unclaimed requests yet.",nil,nil
       end
-      return "沒有未被認領的 pakreq。",nil,nil
+      return "No unclaimed requests yet.",nil,nil
     elsif message.length > 2
-      return "無效的請求，正確格式： /claim@pakreqBot <要認領的包名>",nil,nil
+      return "Invalid request. Usage: /claim@pakreqBot <package name(leave it blank if you want to claim a package randomly)>",nil,nil
     else
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
-        return "無法讀取數據庫，請聯繫 @TheSaltedFish",nil,nil
+        @@logger.error("Unable to read database.")
+        return "Unable to read database, please contact the administrators.",nil,nil
       end
       pkglist[0].map do |arr|
         if message[1] == arr[0]
           status = Database.pkg_claim(@@db,message[1],packager_username,packager_id)
           if status == false
-            return "認領失敗，請聯繫 @TheSaltedFish",nil,nil
+            @@logger.error("Cannot claim request#{message[1]}")
+            return "Failed to claim request #{message[1]}",nil,nil
           else
             case arr[2]
             when 1
@@ -318,31 +345,38 @@ class PAKREQBOT
             when 3
               category = "optreq"
             end
-            notification = "#{category} #{message[1]} 已被 @#{packager_username} 認領。"
-            notification_requester = Array[arr[6],"您的 "+notification]
-            return "認領成功。\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
+            if (packager_username == nil)
+              packager = "ID: ##{packager_id}"
+            else
+              packager = "@#{packager_username}(#{packager_id})"
+            end
+            notification = "#{category} #{message[1]} claimed by #{packager}."
+            notification_requester = Array[arr[6],"Your "+notification]
+            return "Successfully claimed #{message[1]}.\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
           end
         end
       end
-      return "無效的請求，列隊中無此請求。",nil,nil
+      return "Invalid request.",nil,nil
     end
   end
 
   def self.unclaim_pkg(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "使用方法： /unclaim@pakreqBot <包名>",nil,nil
+      return "Usage: /unclaim@pakreqBot <package name>",nil,nil
     elsif message.length == 2
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
-        return "無法讀取數據庫，請聯繫 @TheSaltedFish",nil,nil
+        @@logger.error("Unable to read database.")
+        return "Unable to read database, please contact the administrators.",nil,nil
       end
       pkglist[0].map do |arr|
         if arr[0] == message[1]
           if requester_id == arr[4]
             status = Database.pkg_unclaim(@@db,message[1])
             if status == false
-              return "取消認領失敗，請聯繫 @TheSaltedFish",nil,nil
+              @@logger.error("Unable to unclaim request #{message[1]}")
+              return "Unable to unclaim #{message[1]}, please contact the administrators.",nil,nil
             else
               case arr[2]
               when 1
@@ -352,29 +386,35 @@ class PAKREQBOT
               when 3
                 category = "optreq"
               end
-              notification = "#{category} #{message[1]} 被 @#{requester_username} 取消了認領。"
-              notification_requester = Array[arr[6],"您的 "+notification]
-              return "取消認領成功。\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
+              if (packager_username == nil)
+                packager = "ID: ##{packager_id}"
+              else
+                packager = "@#{packager_username}(#{packager_id})"
+              end
+              notification = "#{category} #{message[1]} unclaimed by #{packager}"
+              notification_requester = Array[arr[6],"Your "+notification]
+              return "Successfully unclaimed #{message[1]}\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
             end
           else
-            return "只能由認領了此包的打包者取消認領。",nil,nil
+            return "Only the people who claimed this package can unclaim it.",nil,nil
           end
         end
       end
-      return "無效的請求，使用方法： /unclaim@pakreqBot <包名>",nil,nil
+      return "Invalid request. Usage: /unclaim@pakreqBot <package name>",nil,nil
     end
   end
 
   def self.set_efd(message,requester_id)
     message = message.split
     if message.length < 2
-      return "使用方法： /setefd@pakreqBot <包名> <日期（格式：YYYY-mm-dd）>",nil,nil
+      return "Usage: /setefd@pakreqBot <package name> <date(format:YYYY-mm-dd)>",nil,nil
     elsif message.length == 2
-      return "無效的請求，正確格式： /setefd@pakreqBot <包名> <日期（格式：YYYY-mm-dd）>",nil,nil
+      return "Invalid request. Usage: /setefd@pakreqBot <package name> <date(format:YYYY-mm-dd)>",nil,nil
     elsif message.length > 2
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
-        return "無法讀取數據庫，請聯繫 @TheSaltedFish",nil,nil
+        @@logger.error("Unable to read database.")
+        return "Unable to read database, please contact the administrators.",nil,nil
       end
       pkglist[0].map do |arr|
         if message[1] == arr[0]
@@ -392,36 +432,38 @@ class PAKREQBOT
               efd = efd + "#{message[num]} "
             end
             Database.pkg_set_efd(@@db,message[1],efd)
-            notification = "#{category} #{arr[0]} 預計將在 #{efd}完成。"
-            notification_requester = Array[arr[6],"您的 "+notification]
-            return "設置成功。\n#{self.list_pkg("/list@pakreqBot #{arr[0]}","req")}",notification,notification_requester
+            notification = "#{category} #{arr[0]}'s estimated date set to #{efd}"
+            notification_requester = Array[arr[6],"Your "+notification]
+            return "Successfully set estimated date.\n#{self.list_pkg("/list@pakreqBot #{arr[0]}","req")}",notification,notification_requester
           else
-            return "只能由對應的打包者設置預計完成的時間。",nil,nil
+            return "Only the one who claimed this package can set estimate date.",nil,nil
           end
         end
       end
-      return "列隊中無此請求。",nil,nil
+      return "#{message[1]} not in the pending list.",nil,nil
     end
-    return "無效的請求，正確格式： /setefd@pakreqBot <包名> <日期（格式：YYYY-mm-dd HH:MM:SS +HHMM）>",nil,nil
+    return "Invalid request. Usage: /setefd@pakreqBot <package name> <date(format:YYYY-mm-dd)>",nil,nil
   end
 
   def self.mark_done(message,requester_id)
     message = message.split
     if message.length < 2
-      return "使用方法： /done@pakreqBot <包名>",nil,nil
+      return "Usage: /done@pakreqBot <package name>",nil,nil
     elsif message.length > 2
-      return "無效的請求，正確格式： /done@pakreqBot <完成的包名>",nil,nil
+      return "Invalid request. Usage: /done@pakreqBot <package name>",nil,nil
     else
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
-        return "無法讀取數據庫，請聯繫 @TheSaltedFish",nil,nil
+        @@logger.error("Unable to read database.")
+        return "Unable to read database, please contact the administrators.",nil,nil
       end
       pkglist[0].map do |arr|
         if (message[1] == arr[0])
           if (requester_id == arr[4])
             status = Database.pkg_done(@@db,message[1],requester_id)
             if status == false
-              return "標記完成失敗，請聯繫 @TheSaltedFish",nil,nil
+              @@logger.error("Unable to mark #{arr[0]} as done.")
+              return "Unable to mark #{arr[0]} as done, please contact the administrators.",nil,nil
             end
             case arr[2]
             when 1
@@ -431,26 +473,32 @@ class PAKREQBOT
             when 3
               category = "optreq"
             end
-            notification = "#{category} #{message[1]} 已完成"
-            notification_requester = Array[arr[6],notification]
-            return "已標記完成。\n#{self.list_pkg("/list@pakreqBot","req")}",notification,notification_requester
+            if arr[3] == nil
+              packager = "ID: ##{arr[4]}"
+            else
+              packager = "@#{arr[3]}(#{arr[4]})"
+            end
+            notification = "#{packager} marked #{category} #{message[1]} as DONE."
+            notification_requester = Array[arr[6],"✅ Your "+notification]
+            return "Marked #{message[1]} as DONE.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,notification_requester
           else
-            return "只有對應的打包者才能標記完成。",nil,nil
+            return "Only the people who claimed the package can mark it as done.",nil,nil
           end
         end
       end
-      return "無效的請求，列隊中無此請求。",nil,nil
+      return "Invalid request.",nil,nil
     end
   end
 
   def self.reject_pkg(message,packager_username,packager_id)
     message = message.split
     if message.length < 2
-      return "使用方法：/reject@pakreqBot <包名> <理由>",nil,nil
+      return "Usage: /reject@pakreqBot <package name> <reason(optional)>",nil,nil
     else
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
-        return "無法讀取數據庫，請聯繫 @TheSaltedFish",nil,nil
+        @@logger.error("Unable to read database.")
+        return "Unable to read database, please contact the administrators.",nil,nil
       end
       pkglist[0].map do |arr|
         if (message[1] == arr[0])
@@ -469,141 +517,167 @@ class PAKREQBOT
               category = "optreq"
             end
             if reason.split == []
-              reason = "未知"
+              reason = "<Unknown>"
             end
-            notification = "#{category} #{message[1]} 已被 @#{packager_username} 拒絕。\n"
-            notification = notification + "理由是： #{reason}"
-            notification_requester = Array[arr[6],"您的 "+notification]
-            return "已成功拒絕。",notification,notification_requester
+            if packager_username == nil
+              packager = "ID: #{arr[4]}"
+            else
+              packager = "@#{arr[3]}(#{arr[4]})"
+            end
+            notification = "#{category} #{message[1]} rejected by #{packager}.\n"
+            notification = notification + "The reason is: #{reason}"
+            notification_requester = Array[arr[6],"❌ Your "+notification]
+            return "Successfully rejected #{message[1]}",notification,notification_requester
           else
-            return "未能成功標記拒絕，請聯繫 @TheSaltedFish",nil,nil
+            @@logger.error("Unable to reject #{message[1]}, please contact the administrators.")
+            return "Unable to reject #{message[1]}, please contact the administrators.",nil,nil
           end
         end
       end
-      return "列隊中無此請求",nil,nil
+      return "Invalid request.",nil,nil
     end
   end
 
   def self.user_subscribe(user_id,user_username,chat_id)
     users = Database.user_list(@@db)
     if users[1] == false
-      return "無法讀取用戶數據庫，請聯繫 @TheSaltedFish"
+      @@logger.error("Unable to read database.")
+      return "Unable to read user database, please contact the administrators."
     end
     if (users[0] != nil) and (users[0] != [])
       users[0].map do |arr|
         if (user_id == arr[0]) and (arr[4] == 1)
-          return "已經訂閱，無需重複訂閱。輸入 /unsubscribe@pakreqBot 以退訂"
+          return "You already subscribed. Use /unsubscribe@pakreqBot to unsubscribe."
         elsif (user_id == arr[0]) and (arr[4] != 1)
           status = Database.user_set(@@db,"subscribe",user_id,true)
           if status == true
-            return "訂閱成功！"
+            return "Successfully subscribed."
           else
-            return "訂閱失敗，請聯繫 @TheSaltedFish"
+            @@logger.error("Unable to subscribe.")
+            return "Failed to subscribe. Please contact the administrators."
           end
         elsif (user_id == arr[0]) and (arr[3] != 1)
-          return "由於 Telegram 限制，Bot 無法主動創建會話，請先與 Bot 創建會話並重試。如果已創建會話，請在會話中輸入 /start 以創建記錄。"
+          return "Because of the limitation of Telegram Bot API, bots cannot start chat with user directly. Please send /start to this bot."
         end
       end
     end
     if user_id != chat_id
-      return "由於 Telegram 限制，Bot 無法主動創建會話，請先與本 Bot 創建會話並重試。如果已創建會話，請在會話中輸入 /start 以創建記錄。"
+      return "Because of the limitation of Telegram Bot API, bots cannot start chat with user directly. Please send /start to this bot."
     else
       status = Database.user_reg(@@db,user_id,user_username)
       if status == false
-        return "用戶登記失敗，請聯繫 @TheSaltedFish"
+        @@logger.error("Unable to register user.")
+        return "Failed to register user. Please contact the administrators."
       end
       status = Database.user_set(@@db,"session",user_id,true)
       if status == false
-        return "用戶會話狀態登記失敗，請聯繫 @TheSaltedFish"
+        @@logger.error("Unable to set session status.")
+        return "Failed to set session status. Please contact the administrators."
       end
       status = Database.user_set(@@db,"subscribe",user_id,true)
       if status == true
-        return "訂閱成功！"
+        return "Successfully subscribed."
       else
-        return "訂閱失敗，請聯繫 @TheSaltedFish"
+        @@logger.error("Unable to subscribe.")
+        return "Failed to subscribe. Please contact the administrators."
       end
     end
-    return "訂閱失敗，未知錯誤，請聯繫 @TheSaltedFish"
+    return "Unknown error. Please contact the administrators."
   end
 
   def self.user_unsubscribe(user_id)
     users = Database.user_list(@@db)
     if users[1] == false
-      return "無法讀取用戶數據庫，請聯繫 @TheSaltedFish"
+      @@logger.error("Unable to read database.")
+      return "Unable to read user database, please contact the administrators."
     end
     users[0].map do |arr|
       if user_id == arr[0]
         status = Database.user_set(@@db,"subscribe",user_id,false)
         if status == true
-          return "退訂成功！"
+          return "Successfully unsubscribed."
         else
-          return "退訂失敗，請聯繫 @TheSaltedFish"
+          return "Unsubscribe failed. Please contact the administrators."
         end
       end
     end
-    return "此帳號並未訂閱。"
+    return "This account didn't subscribed."
   end
 
   def self.user_start(user_id,user_username,chat_id)
     if user_id == chat_id
       users = Database.user_list(@@db)
       if users[1] == false
-        return "無法讀取用戶數據庫，請聯繫 @TheSaltedFish"
+        @@logger.error("Unable to read database.")
+        return "Unable to read database, please contact the administrators."
       end
       if (users[0] != nil) and (users[0] != [])
         users[0].map do |arr|
           if arr[0] == arr[0]
-            return "發送 /help 以查看幫助信息"
+            response = self.display_help
+            return response
           else
             status = Database.user_reg(@@db,user_id,user_username)
             if status == false
-              return "用戶登記失敗，請聯繫 @TheSaltedFish"
+              @@logger.error("Unable to register user.")
+              return "Failed to register user. Please contact the administrators."
             end
             status = Database.user_set(@@db,"session",user_id,true)
             if status == false
-              return "用戶會話狀態登記失敗，請聯繫 @TheSaltedFish"
+              @@logger.error("Unable to set session status.")
+              return "Failed to set session status. Please contact the administrators."
             end
-            return "發送 /help 以查看幫助信息"
+            response = self.display_help
+            return response
           end
         end
       else
         status = Database.user_reg(@@db,user_id,user_username)
         if status == false
-          return "用戶登記失敗，請聯繫 @TheSaltedFish"
+          @@logger.error("Unable to register user.")
+          return "Failed to register user. Please contact the administrators."
         end
         status = Database.user_set(@@db,"session",user_id,true)
         if status == false
-          return "用戶會話狀態登記失敗，請聯繫 @TheSaltedFish"
+          @@logger.error("Unable to set session status.")
+          return "Failed to set session status. Please contact the administrators."
         end
-        return "發送 /help 以查看幫助信息"
+        response = self.display_help
+        return response
       end
     end
-    return "發送 /help 以查看幫助信息"
+    response = self.display_help
+    return response
+  end
+
+  def self.display_help
+    response = "A bot that designed to execute Jelly.\n"
+    response = response + "Command list:\n"
+    response = response + "/pakreq@pakreqBot <package name> <description(optional)> - Add a new pakreq.\n"
+    response = response + "/updreq@pakreqBot <package name> <description(optional)> - Add a new updreq.\n"
+    response = response + "/optreq@pakreqBot <package name> <description(optional)> - Add a new optreq.\n"
+    response = response + "/claim@pakreqBot <package name(leave it blank if you want to claim a package randomly)> - Claim a request.\n"
+    response = response + "/unclaim@pakreqBot <package name> - Unclaim  a request.\n"
+    response = response + "/done@pakreqBot <package name> - Mark a request as done.\n"
+    response = response + "/set_efd@pakreqBot <package name> <date> - Set estimate date of a request.\n"
+    response = response + "/reject@pakreqBot <package name> <reason(optional)> - Reject a request.\n"
+    response = response + "/list@pakreqBot <package name(optional)>- List pending requests.\n"
+    response = response + "/dlist@pakreqBot <package name(optional)>- List done requests.\n"
+    response = response + "/rlist@pakreqBot <package name(optional)>- List rejected requests.\n"
+    response = response + "/subscribe@pakreqBot - Subscribe.\n"
+    response = response + "/unsubcribe@pakreqBot - Unsubscribe.\n"
+    response = response + "/help@pakreqBot - Show this help message."
+    return response
   end
 
   def self.message_parser(message)
     case message.text
     when /\/start/
       response = self.user_start(message.from.id,message.from.username,message.chat.id)
-      return response,nil
+      return response,nil,nil
     when /\/help/
-      response = "果凍處決特化型 Bot\n"
-      response = response + "命令列表：\n"
-      response = response + "/pakreq@pakreqBot <包名> <描述> - 添加一個新的 pakreq。\n"
-      response = response + "/updreq@pakreqBot <包名> <描述> - 添加一個新的 updreq。\n"
-      response = response + "/optreq@pakreqBot <包名> <描述> - 添加一個新的 optreq。\n"
-      response = response + "/claim@pakreqBot <包名> - 認領一個請求（或不加參數以隨便認領一個請求）。\n"
-      response = response + "/unclaim@pakreqBot <包名> - 取消認領一個請求。\n"
-      response = response + "/done@pakreqBot <包名> - 標記這個 pakreq 已完成，必須由打包者執行。\n"
-      response = response + "/set_efd@pakreqBot <包名> <日期> - 設置預期的完成日期（其實 Bot 並不會檢查是否遵守格式 XD）。\n"
-      response = response + "/reject@pakreqBot <包名> <原因> - 拒絕一個請求。\n"
-      response = response + "/list@pakreqBot <包名（可選）>- 列出所有未完成的請求（加上包名即顯示請求具體信息）\n"
-      response = response + "/dlist@pakreqBot <包名（可選）>- 列出所有已完成的請求（加上包名即顯示請求具體信息）\n"
-      response = response + "/rlist@pakreqBot <包名（可選）>- 列出所有已拒絕的請求（加上包名即顯示請求具體信息）\n"
-      response = response + "/subscribe@pakreqBot - 在 pakreq 狀態有更新時得到提醒（訂閱）\n"
-      response = response + "/unsubcribe@pakreqBot - 關閉提醒（退訂）\n"
-      response = response + "/help@pakreqBot - 查看此幫助信息"
-      return response,nil
+      response = self.display_help
+      return response,nil,nil
     when /\/pakreq/
       response = self.new_pakreq(message.text,message.from.username,message.from.id)
       return response
