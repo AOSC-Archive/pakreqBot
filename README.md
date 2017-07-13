@@ -3,8 +3,8 @@ pakreqBot
 
 Yet another JellyBai execution bot.
 
-Deploy
-------
+Deployment
+----------
 
     $ git clone https://github.com/RedL0tus/pakreqBot
     $ cd pakreqBot

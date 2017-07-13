@@ -48,12 +48,12 @@ class PAKREQBOT
     # Initialize config
     if !(File.exist?("config.yml"))
       puts 'File "config.yml" not found, aborting...'
-      puts 'Please run "rake mkconfig" before start the bot.'
+      puts 'Please run "rake mkconfig" before starting the bot.'
       exit
     end
     if !(File.exist?("data#{slash}database.db"))
       puts 'Database not found, aborting...'
-      puts 'Please run "rake mkconfig" before start the bot.'
+      puts 'Please run "rake mkconfig" before starting the bot.'
       exit
     end
     configfile = File.open('config.yml')
@@ -72,11 +72,11 @@ class PAKREQBOT
       filename = "logs#{slash}bot_#{time.year}_#{time.yday}_#{time.hour}:#{time.min}:#{time.sec}.log"
       logfile = File.open(filename,"w+")
       @@logger = Logger.new MultiDelegator.delegate(:write, :close).to(STDOUT, logfile)
-      @@logger.info("Logging to file \"#{filename}\"")
+      @@logger.info("Logging to file \"#{filename}\"...")
     end
     @@db = Database.db_open
     if @@db[1] == false
-      @@logger.info("Cannot open database, aborting...")
+      @@logger.info("Cannot open the database, aborting...")
       exit
     end
     @@logger.info("Bot started...")
@@ -90,12 +90,12 @@ class PAKREQBOT
     if (Packages_API.api_queue_pkg(message[1]) == false)
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
-        @@logger.error("Unable to read database \"req\".")
-        return "Unable to read database, please contact the administrators.",nil,nil
+        @@logger.error("Unable to read the database \"req\".")
+        return "Error reading the database, please contact the bot admin.",nil,nil
       end
       pkglist[0].map do |arr|
         if message[1] == arr[0]
-          return "#{message[1]} already in the list.",nil,nil
+          return "#{message[1]} is already in the list.",nil,nil
         end
       end
       description = ""
@@ -109,14 +109,14 @@ class PAKREQBOT
       time = Time.new
       status = Database.pkg_add(@@db,"req",message[1],description,1,nil,nil,requester_username,requester_id,"#{time.getutc}",nil,nil)
       if status == false
-        @@logger.error("Cannot add pakreq \"#{message[1]}\"")
+        @@logger.error("Cannot add pakreq \"#{message[1]}\"!")
       end
-      notification = "A new pakreq:\n"
+      notification = "A new pakreq is added to the list!\n"
       notification = notification + "#{message[1]} - #{description}by @#{requester_username}"
       @@logger.info("A new pakreq: #{message[1]} - #{description}by @#{requester_username}")
-      return "Successfully added #{message[1]} to the pending list.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+      return "Successfully added #{message[1]} to the pakreq listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
     else
-      return "#{message[1]} already in the source.",nil,nil
+      return "#{message[1]} is already in the source.",nil,nil
     end
   end
 
@@ -128,11 +128,11 @@ class PAKREQBOT
     pkglist = Database.pkg_list(@@db,"req")
     if pkglist[1] == false
       @@logger.error("Unable to read database \"req\".")
-      return "Unable to read database, please contact the administrators.",nil,nil
+      return "Error reading the database, please contact the bot admin.",nil,nil
     end
     pkglist[0].map do |arr|
       if message[1] == arr[0]
-        return "#{message[1]} already in the list.",nil,nil
+        return "#{message[1]} is already in the list.",nil,nil
       end
     end
     description = ""
@@ -146,13 +146,13 @@ class PAKREQBOT
     time = Time.new
     status = Database.pkg_add(@@db,"req",message[1],description,2,nil,nil,requester_username,requester_id,"#{time.getutc}",nil,nil)
     if status == false
-      @@logger.error("Cannot add pakreq \"#{message[1]}\"")
-      return "Failed to add a new pakareq. Please contact the administrators."
+      @@logger.error("Cannot add pakreq \"#{message[1]}\"!")
+      return "Failed to add a new pakreq. Please contact the bot admin."
     end
-    notification = "A new updreq:\n"
+    notification = "A new updreq is added to the list!\n"
     notification = notification + "#{message[1]} - #{description}by @#{requester_username}"
     @@logger.info("A new updreq: #{message[1]} - #{description}by @#{requester_username}")
-    return "Successfully added to the pending list.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+    return "Successfully added to the updreq listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
   end
 
   def self.new_optreq(message,requester_username,requester_id)
@@ -163,11 +163,11 @@ class PAKREQBOT
     pkglist = Database.pkg_list(@@db,"req")
     if pkglist[1] == false
       @@logger.error("Unable to read database \"req\".")
-      return "Unable to read database, please contact the administrators.",nil,nil
+      return "Error reading the database, please contact the bot admin.",nil,nil
     end
     pkglist[0].map do |arr|
       if message[1] == arr[0]
-        return "#{message[1]} already in the list.",nil,nil
+        return "#{message[1]} is already in the list.",nil,nil
       end
     end
     description = ""
@@ -181,12 +181,12 @@ class PAKREQBOT
     time = Time.new
     status = Database.pkg_add(@@db,"req",message[1],description,3,nil,nil,requester_username,requester_id,"#{time.getutc}",nil,nil)
     if status == false
-      @@logger.error("Cannot add pakreq \"#{message[1]}\"")
+      @@logger.error("Cannot add pakreq \"#{message[1]}\"!")
     end
-    notification = "A new optreq:\n"
+    notification = "A new optreq is added to the list!\n"
     notification = notification + "#{message[1]} - #{description}By @#{requester_username}"
     @@logger.info("A new optreq: #{message[1]} - #{description}by @#{requester_username}")
-    return "Successfully added to the list.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+    return "Successfully added to the optreq listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
   end
 
   def self.list_pkg(message,table)
@@ -194,16 +194,16 @@ class PAKREQBOT
     pkglist = Database.pkg_list(@@db,table)
     if pkglist[1] == false
       @@logger.error("Unable to read database.")
-      return "Unable to read database, please contact the administrators."
+      return "Error reading the database, please contact the bot admin."
     end
     if pkglist[0] == []
       case table
       when "req"
-        return "No pending requests yet."
+        return "No pending requests found."
       when "done"
-        return "No done requests yet."
+        return "No done requests found."
       when "rejected"
-        return "No rejected requests yet."
+        return "No rejected requests found."
       end
     else
       if message.length < 2
@@ -257,7 +257,7 @@ class PAKREQBOT
             response = response + "Description: #{arr[1]}\n"
             response = response + "Type: #{category}\n"
             response = response + "Packager: #{packager}\n"
-            response = response + "Requeser: #{requester}\n"
+            response = response + "Requestee: #{requester}\n"
             response = response + "Date: #{arr[7]}\n"
             if table == "req"
               if arr[8] == nil
@@ -265,7 +265,7 @@ class PAKREQBOT
               else
                 expected_finishing_date = "#{arr[8]}"
               end
-              response = response + "Estimate date: #{expected_finishing_date}"
+              response = response + "ETA: #{expected_finishing_date}"
             end
             if table == "rejected"
               @@logger.info("\"#{arr[8]}\"")
@@ -289,7 +289,7 @@ class PAKREQBOT
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Unable to read database, please contact the administrators.",nil,nil
+        return "Error reading the database, please contact the bot admin.",nil,nil
       end
       if (pkglist[0] != nil) or (pkglist[0] != [])
         pkglist[0].map do |arr|
@@ -297,7 +297,7 @@ class PAKREQBOT
             status = Database.pkg_claim(@@db,arr[0],packager_username,packager_id)
             if status == false
               @@logger.error("Failed to claim request #{arr[0]}.")
-              return "Failed while claiming package, please contact the administrators.",nil,nil
+              return "Error claiming the package, please contact the bot admin.",nil,nil
             else
               case arr[2]
               when 1
@@ -319,23 +319,23 @@ class PAKREQBOT
           end
         end
       else
-        return "No unclaimed requests yet.",nil,nil
+        return "No unclaimed requests found.",nil,nil
       end
-      return "No unclaimed requests yet.",nil,nil
+      return "No unclaimed requests found.",nil,nil
     elsif message.length > 2
       return "Invalid request. Usage: /claim@pakreqBot <package name(leave it blank if you want to claim a package randomly)>",nil,nil
     else
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Unable to read database, please contact the administrators.",nil,nil
+        return "Error reading the database, please contact the bot admin.",nil,nil
       end
       pkglist[0].map do |arr|
         if message[1] == arr[0]
           status = Database.pkg_claim(@@db,message[1],packager_username,packager_id)
           if status == false
             @@logger.error("Cannot claim request#{message[1]}")
-            return "Failed to claim request #{message[1]}",nil,nil
+            return "Error claiming request #{message[1]}",nil,nil
           else
             case arr[2]
             when 1
@@ -368,7 +368,7 @@ class PAKREQBOT
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Unable to read database, please contact the administrators.",nil,nil
+        return "Error reading the database, please contact the bot admin.",nil,nil
       end
       pkglist[0].map do |arr|
         if arr[0] == message[1]
@@ -376,7 +376,7 @@ class PAKREQBOT
             status = Database.pkg_unclaim(@@db,message[1])
             if status == false
               @@logger.error("Unable to unclaim request #{message[1]}")
-              return "Unable to unclaim #{message[1]}, please contact the administrators.",nil,nil
+              return "Unable to unclaim #{message[1]}, please contact the bot admin.",nil,nil
             else
               case arr[2]
               when 1
@@ -414,7 +414,7 @@ class PAKREQBOT
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Unable to read database, please contact the administrators.",nil,nil
+        return "Error reading the database, please contact the bot admin.",nil,nil
       end
       pkglist[0].map do |arr|
         if message[1] == arr[0]
@@ -455,7 +455,7 @@ class PAKREQBOT
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Unable to read database, please contact the administrators.",nil,nil
+        return "Error reading the database, please contact the bot admin.",nil,nil
       end
       pkglist[0].map do |arr|
         if (message[1] == arr[0])
@@ -463,7 +463,7 @@ class PAKREQBOT
             status = Database.pkg_done(@@db,message[1],requester_id)
             if status == false
               @@logger.error("Unable to mark #{arr[0]} as done.")
-              return "Unable to mark #{arr[0]} as done, please contact the administrators.",nil,nil
+              return "Unable to mark #{arr[0]} as done, please contact the bot admin.",nil,nil
             end
             case arr[2]
             when 1
@@ -498,7 +498,7 @@ class PAKREQBOT
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Unable to read database, please contact the administrators.",nil,nil
+        return "Error reading the database, please contact the bot admin.",nil,nil
       end
       pkglist[0].map do |arr|
         if (message[1] == arr[0])
@@ -529,8 +529,8 @@ class PAKREQBOT
             notification_requester = Array[arr[6],"❌ Your "+notification]
             return "Successfully rejected #{message[1]}",notification,notification_requester
           else
-            @@logger.error("Unable to reject #{message[1]}, please contact the administrators.")
-            return "Unable to reject #{message[1]}, please contact the administrators.",nil,nil
+            @@logger.error("Unable to reject #{message[1]}, please contact the bot admin.")
+            return "Unable to reject #{message[1]}, please contact the bot admin.",nil,nil
           end
         end
       end
@@ -542,7 +542,7 @@ class PAKREQBOT
     users = Database.user_list(@@db)
     if users[1] == false
       @@logger.error("Unable to read database.")
-      return "Unable to read user database, please contact the administrators."
+      return "Error read user database, please contact the bot admin."
     end
     if (users[0] != nil) and (users[0] != [])
       users[0].map do |arr|
@@ -554,42 +554,42 @@ class PAKREQBOT
             return "Successfully subscribed."
           else
             @@logger.error("Unable to subscribe.")
-            return "Failed to subscribe. Please contact the administrators."
+            return "Failed to subscribe. Please contact the bot admin."
           end
         elsif (user_id == arr[0]) and (arr[3] != 1)
-          return "Because of the limitation of Telegram Bot API, bots cannot start chat with user directly. Please send /start to this bot."
+          return "Due to the limitation of Telegram Bot API, bots cannot start chat with user directly. Please send /start to this bot."
         end
       end
     end
     if user_id != chat_id
-      return "Because of the limitation of Telegram Bot API, bots cannot start chat with user directly. Please send /start to this bot."
+      return "Due to the limitation of Telegram Bot API, bots cannot start chat with user directly. Please send /start to this bot."
     else
       status = Database.user_reg(@@db,user_id,user_username)
       if status == false
         @@logger.error("Unable to register user.")
-        return "Failed to register user. Please contact the administrators."
+        return "Failed to register user. Please contact the bot admin."
       end
       status = Database.user_set(@@db,"session",user_id,true)
       if status == false
         @@logger.error("Unable to set session status.")
-        return "Failed to set session status. Please contact the administrators."
+        return "Failed to set session status. Please contact the bot admin."
       end
       status = Database.user_set(@@db,"subscribe",user_id,true)
       if status == true
         return "Successfully subscribed."
       else
         @@logger.error("Unable to subscribe.")
-        return "Failed to subscribe. Please contact the administrators."
+        return "Failed to subscribe. Please contact the bot admin."
       end
     end
-    return "Unknown error. Please contact the administrators."
+    return "Unknown error. Please contact the bot admin."
   end
 
   def self.user_unsubscribe(user_id)
     users = Database.user_list(@@db)
     if users[1] == false
       @@logger.error("Unable to read database.")
-      return "Unable to read user database, please contact the administrators."
+      return "Error read user database, please contact the bot admin."
     end
     users[0].map do |arr|
       if user_id == arr[0]
@@ -597,7 +597,7 @@ class PAKREQBOT
         if status == true
           return "Successfully unsubscribed."
         else
-          return "Unsubscribe failed. Please contact the administrators."
+          return "Unsubscribe failed. Please contact the bot admin."
         end
       end
     end
@@ -609,7 +609,7 @@ class PAKREQBOT
       users = Database.user_list(@@db)
       if users[1] == false
         @@logger.error("Unable to read database.")
-        return "Unable to read database, please contact the administrators."
+        return "Error reading the database, please contact the bot admin."
       end
       if (users[0] != nil) and (users[0] != [])
         users[0].map do |arr|
@@ -620,12 +620,12 @@ class PAKREQBOT
             status = Database.user_reg(@@db,user_id,user_username)
             if status == false
               @@logger.error("Unable to register user.")
-              return "Failed to register user. Please contact the administrators."
+              return "Failed to register user. Please contact the bot admin."
             end
             status = Database.user_set(@@db,"session",user_id,true)
             if status == false
               @@logger.error("Unable to set session status.")
-              return "Failed to set session status. Please contact the administrators."
+              return "Failed to set session status. Please contact the bot admin."
             end
             response = self.display_help
             return response
@@ -635,12 +635,12 @@ class PAKREQBOT
         status = Database.user_reg(@@db,user_id,user_username)
         if status == false
           @@logger.error("Unable to register user.")
-          return "Failed to register user. Please contact the administrators."
+          return "Failed to register user. Please contact the bot admin."
         end
         status = Database.user_set(@@db,"session",user_id,true)
         if status == false
           @@logger.error("Unable to set session status.")
-          return "Failed to set session status. Please contact the administrators."
+          return "Failed to set session status. Please contact the bot admin."
         end
         response = self.display_help
         return response
