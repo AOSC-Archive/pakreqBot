@@ -8,9 +8,9 @@
 # terms of the Do What The Fuck You Want To Public License, Version 2,
 # as published by Sam Hocevar. See the LICENSE file for more details.
 
+require 'yaml'
 require 'logger'
 require 'rbconfig'
-require 'yaml'
 require 'telegram/bot'
 require_relative 'libs/database.rb'
 require_relative 'libs/packages_api.rb'
@@ -82,20 +82,29 @@ class PAKREQBOT
     @@logger.info("Bot started...")
   end
 
+  def self.string_escape(message)
+    response = message.to_s
+    response = response.gsub(/\&/,"&amp;")
+    response = response.gsub(/\</,"&lt;")
+    response = response.gsub(/\>/,"&gt;")
+    return response
+  end
+
   def self.new_pakreq(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "Usage: /pakreq@pakreqBot <package name> <description(optional)>",nil,nil
+      return "<b>Usage:</b> <code>/pakreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code>",nil,nil
     end
     if (Packages_API.api_queue_pkg(message[1]) == false)
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read the database \"req\".")
-        return "Error reading the database, please contact the bot admin.",nil,nil
+        return "<b>Error reading the database, please contact the bot admin.</b>",nil,nil
       end
       pkglist[0].map do |arr|
         if message[1] == arr[0]
-          return "#{message[1]} is already in the list.",nil,nil
+          pkgname = self.string_escape(message[1])
+          return "#{pkgname} is <b>ALREADY</b> in the list.",nil,nil
         end
       end
       description = ""
@@ -108,31 +117,35 @@ class PAKREQBOT
       end
       time = Time.new
       status = Database.pkg_add(@@db,"req",message[1],description,1,nil,nil,requester_username,requester_id,"#{time.getutc}",nil,nil)
+      pkgname = self.string_escape(message[1])
+      description = self.string_escape(description)
       if status == false
-        @@logger.error("Cannot add pakreq \"#{message[1]}\"!")
+        @@logger.error("Cannot add pakreq \"#{pkgname}\"!")
       end
-      notification = "A new pakreq is added to the list!\n"
-      notification = notification + "#{message[1]} - #{description}by @#{requester_username}"
-      @@logger.info("A new pakreq: #{message[1]} - #{description}by @#{requester_username}")
-      return "Successfully added #{message[1]} to the pakreq listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+      notification = "A new <i>pakreq</i> is added to the list!\n"
+      notification = notification + "<b>#{pkgname}</b> - #{description}by @#{requester_username}"
+      @@logger.info("A new pakreq: #{pkgname} - #{description}by @#{requester_username}")
+      return "Successfully added <b>#{pkgname}</b> to the <i>pakreq</i> listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
     else
-      return "#{message[1]} is already in the source.",nil,nil
+      pkgname = self.string_escape(message[1])
+      return "#{pkgname} is already in the source.",nil,nil
     end
   end
 
   def self.new_updreq(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "Usage: /updreq@pakreqBot <package name> <description(optional)>",nil,nil
+      return "<b>Usage:</b> <code>/updreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code>",nil,nil
     end
     pkglist = Database.pkg_list(@@db,"req")
     if pkglist[1] == false
       @@logger.error("Unable to read database \"req\".")
-      return "Error reading the database, please contact the bot admin.",nil,nil
+      return "<b>Error reading the database, please contact the bot admin.</b>",nil,nil
     end
     pkglist[0].map do |arr|
       if message[1] == arr[0]
-        return "#{message[1]} is already in the list.",nil,nil
+        pkgname = self.string_escape(message[1])
+        return "<b>#{pkgname}</b> is already in the list.",nil,nil
       end
     end
     description = ""
@@ -147,27 +160,30 @@ class PAKREQBOT
     status = Database.pkg_add(@@db,"req",message[1],description,2,nil,nil,requester_username,requester_id,"#{time.getutc}",nil,nil)
     if status == false
       @@logger.error("Cannot add pakreq \"#{message[1]}\"!")
-      return "Failed to add a new pakreq. Please contact the bot admin."
+      return "<b>Failed to add a new pakreq. Please contact the bot admin.</b>",nil,nil
     end
-    notification = "A new updreq is added to the list!\n"
-    notification = notification + "#{message[1]} - #{description}by @#{requester_username}"
-    @@logger.info("A new updreq: #{message[1]} - #{description}by @#{requester_username}")
-    return "Successfully added to the updreq listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+    description = self.string_escape(description)
+    pkgname = self.string_escape(message[1])
+    notification = "A new <i>updreq</i> is added to the list!\n"
+    notification = notification + "<b>#{pkgname}</b> - #{description}by @#{requester_username}"
+    @@logger.info("A new updreq: #{pkgname} - #{description}by @#{requester_username}")
+    return "Successfully added to the <i>updreq</i> listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
   end
 
   def self.new_optreq(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "Usage: /optreq@pakreqBot <package name> <description(optional)>",nil,nil
+      return "<b>Usage:</b> <code>/optreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code>",nil,nil
     end
     pkglist = Database.pkg_list(@@db,"req")
     if pkglist[1] == false
       @@logger.error("Unable to read database \"req\".")
-      return "Error reading the database, please contact the bot admin.",nil,nil
+      return "<b>Error reading the database, please contact the bot admin.</b>",nil,nil
     end
     pkglist[0].map do |arr|
       if message[1] == arr[0]
-        return "#{message[1]} is already in the list.",nil,nil
+        pkgname = self.string_escape(message[1])
+        return "#{pkgname} is already in the list.",nil,nil
       end
     end
     description = ""
@@ -180,13 +196,15 @@ class PAKREQBOT
     end
     time = Time.new
     status = Database.pkg_add(@@db,"req",message[1],description,3,nil,nil,requester_username,requester_id,"#{time.getutc}",nil,nil)
+    pkgname = self.string_escape(message[1])
+    description = self.string_escape(description)
     if status == false
       @@logger.error("Cannot add pakreq \"#{message[1]}\"!")
     end
-    notification = "A new optreq is added to the list!\n"
-    notification = notification + "#{message[1]} - #{description}By @#{requester_username}"
-    @@logger.info("A new optreq: #{message[1]} - #{description}by @#{requester_username}")
-    return "Successfully added to the optreq listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+    notification = "A new <i>optreq</i> is added to the list!\n"
+    notification = notification + "<b>#{pkgname}</b> - #{description}By @#{requester_username}"
+    @@logger.info("A new optreq: #{pkgname} - #{description}by @#{requester_username}")
+    return "Successfully added to the <i>optreq</i> listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
   end
 
   def self.list_pkg(message,table)
@@ -194,17 +212,18 @@ class PAKREQBOT
     pkglist = Database.pkg_list(@@db,table)
     if pkglist[1] == false
       @@logger.error("Unable to read database.")
-      return "Error reading the database, please contact the bot admin."
+      return "<b>Error reading the database, please contact the bot admin.</b>"
     end
     if pkglist[0] == []
       case table
       when "req"
-        return "No pending requests found."
+        return "<b>No pending requests found.</b>"
       when "done"
-        return "No done requests found."
+        return "<b>No done requests found.</b>"
       when "rejected"
-        return "No rejected requests found."
+        return "<b>No rejected requests found.</b>"
       end
+      return "<b>Unknown error, please contact the bot admin.</b>"
     else
       if message.length < 2
         case table
@@ -224,10 +243,13 @@ class PAKREQBOT
           when 3
             category = "optreq"
           end
-          response = response + "#{arr[0]} (#{category}) : #{arr[1]}\n"
+          pkgname = self.string_escape(arr[0])
+          description = self.string_escape(arr[1])
+          response = response + "<b>#{pkgname}</b> (<i>#{category}</i>) : #{description}\n"
         end
         return response
       elsif message.length == 2
+        response = ""
         pkglist[0].map do |arr|
           if arr[0] == message[1]
             if (arr[4] == nil)
@@ -252,20 +274,27 @@ class PAKREQBOT
             when 3
               category = "optreq"
             end
-            response = "Details of #{message[1]}:\n"
-            response = response + "Package name: #{arr[0]}\n"
-            response = response + "Description: #{arr[1]}\n"
-            response = response + "Type: #{category}\n"
-            response = response + "Packager: #{packager}\n"
-            response = response + "Requestee: #{requester}\n"
-            response = response + "Date: #{arr[7]}\n"
+            pkgname = self.string_escape(arr[0])
+            description = self.string_escape(arr[1])
+            category = self.string_escape(category)
+            packager = self.string_escape(packager)
+            requester = self.string_escape(requester)
+            date = self.string_escape(arr[7])
+            response = response + "Details of <b>#{pkgname}:</b>\n"
+            response = response + "<b>Package name:</b> #{pkgname}\n"
+            response = response + "<b>Description:</b> #{description}\n"
+            response = response + "<b>Type:</b> <i>#{category}</i>\n"
+            response = response + "<b>Packager:</b> #{packager}\n"
+            response = response + "<b>Requestee:</b> #{requester}\n"
+            response = response + "<b>Date:</b> #{date}\n"
             if table == "req"
               if arr[8] == nil
-                expected_finishing_date = "<Unknown>"
+                eta = "<Unknown>"
               else
-                expected_finishing_date = "#{arr[8]}"
+                eta = "#{arr[8]}"
               end
-              response = response + "ETA: #{expected_finishing_date}"
+              eta = self.string_escape(eta)
+              response = response + "<b>ETA:</b> #{eta}"
             end
             if table == "rejected"
               @@logger.info("\"#{arr[8]}\"")
@@ -274,13 +303,23 @@ class PAKREQBOT
               else
                 reason = arr[8]
               end
-              response = response + "Reason: #{reason}"
+              reason = self.string_escape(reason)
+              response = response + "<b>Reason:</b> #{reason}\n\n"
             end
           end
         end
-        return response
+        if (response != nil) and (response != "")
+          return response
+        else
+          return "<b>Invalid request.</b>"
+        end
+        return "<b>Invalid request.</b>"
+      else
+        return "<b>Invalid request.</b>"
       end
+      return "<b>Invalid request.</b>"
     end
+    return "<b>Invalid request.</b>"
   end
 
   def self.claim_pkg(message,packager_username,packager_id)
@@ -289,7 +328,7 @@ class PAKREQBOT
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Error reading the database, please contact the bot admin.",nil,nil
+        return "<b>Error reading the database, please contact the bot admin.</b>",nil,nil
       end
       if (pkglist[0] != nil) or (pkglist[0] != [])
         pkglist[0].map do |arr|
@@ -297,7 +336,7 @@ class PAKREQBOT
             status = Database.pkg_claim(@@db,arr[0],packager_username,packager_id)
             if status == false
               @@logger.error("Failed to claim request #{arr[0]}.")
-              return "Error claiming the package, please contact the bot admin.",nil,nil
+              return "<b>Error claiming the package, please contact the bot admin.</b>",nil,nil
             else
               case arr[2]
               when 1
@@ -312,30 +351,34 @@ class PAKREQBOT
               else
                 packager = "@#{packager_username}(#{packager_id})"
               end
-              notification = "#{category} #{arr[0]} claimed by #{packager}."
+              pkgname = self.string_escape(arr[0])
+              category = self.string_escape(category)
+              packager = self.string_escape(packager)
+              notification = "<i>#{category}</i> <b>#{pkgname}</b> claimed by #{packager}."
               notification_requester = Array[arr[6],"Your "+notification]
-              return "Successfully claimed request \"#{arr[0]}\"\n#{self.list_pkg("/list@pakreqBot #{arr[0]}","req")}",notification,notification_requester
+              return "Successfully claimed request \"<b>#{pkgname}</b>\"\n#{self.list_pkg("/list@pakreqBot #{arr[0]}","req")}",notification,notification_requester
             end
           end
         end
       else
-        return "No unclaimed requests found.",nil,nil
+        return "<b>No unclaimed requests found.</b>",nil,nil
       end
-      return "No unclaimed requests found.",nil,nil
+      return "<b>No unclaimed requests found.</b>",nil,nil
     elsif message.length > 2
-      return "Invalid request. Usage: /claim@pakreqBot <package name(leave it blank if you want to claim a package randomly)>",nil,nil
+      return "<b>Invalid request. Usage:</b> /claim@pakreqBot &lt;package name(leave it blank if you want to claim a package randomly)&gt;",nil,nil
     else
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Error reading the database, please contact the bot admin.",nil,nil
+        return "<b>Error reading the database, please contact the bot admin.</b>",nil,nil
       end
       pkglist[0].map do |arr|
         if message[1] == arr[0]
           status = Database.pkg_claim(@@db,message[1],packager_username,packager_id)
           if status == false
-            @@logger.error("Cannot claim request#{message[1]}")
-            return "Error claiming request #{message[1]}",nil,nil
+            pkgname = self.string_escape(message[1])
+            @@logger.error("Cannot claim request#{pkgname}")
+            return "Error claiming request <b>#{pkgname}</b>",nil,nil
           else
             case arr[2]
             when 1
@@ -350,33 +393,37 @@ class PAKREQBOT
             else
               packager = "@#{packager_username}(#{packager_id})"
             end
-            notification = "#{category} #{message[1]} claimed by #{packager}."
+            pkgname = self.string_escape(message[1])
+            category = self.string_escape(category)
+            packager = self.string_escape(packager)
+            notification = "<i>#{category}</i> <b>#{pkgname}</b> claimed by #{packager}."
             notification_requester = Array[arr[6],"Your "+notification]
-            return "Successfully claimed #{message[1]}.\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
+            return "Successfully claimed <i>#{category}</i> <b>#{pkgname}</b>.\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
           end
         end
       end
-      return "Invalid request.",nil,nil
+      return "<i>Invalid request.</i>",nil,nil
     end
   end
 
   def self.unclaim_pkg(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "Usage: /unclaim@pakreqBot <package name>",nil,nil
+      return "<b>Usage:</b> <code>/unclaim@pakreqBot &lt;package name&gt;</code>",nil,nil
     elsif message.length == 2
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Error reading the database, please contact the bot admin.",nil,nil
+        return "<b>Error reading the database, please contact the bot admin.</b>",nil,nil
       end
       pkglist[0].map do |arr|
         if arr[0] == message[1]
           if requester_id == arr[4]
             status = Database.pkg_unclaim(@@db,message[1])
             if status == false
+              pkgname = self.string_escape(message[1])
               @@logger.error("Unable to unclaim request #{message[1]}")
-              return "Unable to unclaim #{message[1]}, please contact the bot admin.",nil,nil
+              return "Unable to unclaim <b>#{pkgname}</b>, please contact the bot admin.",nil,nil
             else
               case arr[2]
               when 1
@@ -391,30 +438,33 @@ class PAKREQBOT
               else
                 packager = "@#{packager_username}(#{packager_id})"
               end
-              notification = "#{category} #{message[1]} unclaimed by #{packager}"
+              category = self.string_escape(category)
+              pkgname = self.string_escape(message[1])
+              packager = self.string_escape(packager)
+              notification = "#{category} #{pkgname} unclaimed by #{packager}"
               notification_requester = Array[arr[6],"Your "+notification]
-              return "Successfully unclaimed #{message[1]}\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
+              return "Successfully unclaimed <i>#{category}</i> <b>#{message[1]}</b>\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
             end
           else
-            return "Only the people who claimed this package can unclaim it.",nil,nil
+            return "<b>ONLY</b> the people who claimed this package can unclaim it.",nil,nil
           end
         end
       end
-      return "Invalid request. Usage: /unclaim@pakreqBot <package name>",nil,nil
+      return "<b>Invalid request. Usage:</b> <code>/unclaim@pakreqBot &lt;package name&gt;</code>",nil,nil
     end
   end
 
   def self.set_efd(message,requester_id)
     message = message.split
     if message.length < 2
-      return "Usage: /setefd@pakreqBot <package name> <date(format:YYYY-mm-dd)>",nil,nil
+      return "<b>Usage:</b> <code>/setefd@pakreqBot &lt;package name&gt; &lt;date(format:YYYY-mm-dd)&gt;</code>",nil,nil
     elsif message.length == 2
-      return "Invalid request. Usage: /setefd@pakreqBot <package name> <date(format:YYYY-mm-dd)>",nil,nil
+      return "Invalid request. <b>Usage:</b> <code>/setefd@pakreqBot &lt;package name&gt; &lt;date(format:YYYY-mm-dd)&gt;</code>",nil,nil
     elsif message.length > 2
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Error reading the database, please contact the bot admin.",nil,nil
+        return "<b>Error reading the database, please contact the bot admin.</b>",nil,nil
       end
       pkglist[0].map do |arr|
         if message[1] == arr[0]
@@ -432,30 +482,34 @@ class PAKREQBOT
               efd = efd + "#{message[num]} "
             end
             Database.pkg_set_efd(@@db,message[1],efd)
-            notification = "#{category} #{arr[0]}'s estimated date set to #{efd}"
+            efd = self.string_escape(efd)
+            category = self.string_escape(category)
+            pkgname = self.string_escape(arr[0])
+            notification = "#{category} #{pkgname}'s estimated date set to #{efd}"
             notification_requester = Array[arr[6],"Your "+notification]
-            return "Successfully set estimated date.\n#{self.list_pkg("/list@pakreqBot #{arr[0]}","req")}",notification,notification_requester
+            return "Successfully set estimated date to #{efd}.",notification,notification_requester
           else
-            return "Only the one who claimed this package can set estimate date.",nil,nil
+            return "<b>ONLY</b> the one who claimed this package can set estimate date.",nil,nil
           end
         end
       end
-      return "#{message[1]} not in the pending list.",nil,nil
+      pkgname = self.string_escape(message[1])
+      return "<b>#{pkgname}</b> isn't in the pending list.",nil,nil
     end
-    return "Invalid request. Usage: /setefd@pakreqBot <package name> <date(format:YYYY-mm-dd)>",nil,nil
+    return "<b>Invalid request. Usage:</b> <code>/setefd@pakreqBot &lt;package name&gt; &lt;date(format:YYYY-mm-dd)&gt;</code>",nil,nil
   end
 
   def self.mark_done(message,requester_id)
     message = message.split
     if message.length < 2
-      return "Usage: /done@pakreqBot <package name>",nil,nil
+      return "<b>Usage:</b> <code>/done@pakreqBot &lt;package name&gt;</code>",nil,nil
     elsif message.length > 2
-      return "Invalid request. Usage: /done@pakreqBot <package name>",nil,nil
+      return "<b>Invalid request. Usage:</b> <code>/done@pakreqBot &lt;package name&gt;</code>",nil,nil
     else
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Error reading the database, please contact the bot admin.",nil,nil
+        return "<b>Error reading the database, please contact the bot admin.</b>",nil,nil
       end
       pkglist[0].map do |arr|
         if (message[1] == arr[0])
@@ -463,7 +517,8 @@ class PAKREQBOT
             status = Database.pkg_done(@@db,message[1],requester_id)
             if status == false
               @@logger.error("Unable to mark #{arr[0]} as done.")
-              return "Unable to mark #{arr[0]} as done, please contact the bot admin.",nil,nil
+              pkgname = self.string_escape(arr[0])
+              return "Unable to mark <b>#{pkgname}</b> as done, please contact the bot admin.",nil,nil
             end
             case arr[2]
             when 1
@@ -478,27 +533,30 @@ class PAKREQBOT
             else
               packager = "@#{arr[3]}(#{arr[4]})"
             end
-            notification = "#{packager} marked #{category} #{message[1]} as DONE."
+            packager = self.string_escape(packager)
+            category = self.string_escape(category)
+            pkgname = self.string_escape(message[1])
+            notification = "<i>#{category}</i> <b>#{pkgname}</b> marked as <b>DONE by #{packager}.</b>"
             notification_requester = Array[arr[6],"✅ Your "+notification]
-            return "Marked #{message[1]} as DONE.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,notification_requester
+            return "✅ Marked <b>#{pkgname}</b> as <b>DONE</b>.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,notification_requester
           else
-            return "Only the people who claimed the package can mark it as done.",nil,nil
+            return "<b>ONLY</b> the people who claimed the package can mark it as done.",nil,nil
           end
         end
       end
-      return "Invalid request.",nil,nil
+      return "<b>Invalid request.</b>",nil,nil
     end
   end
 
   def self.reject_pkg(message,packager_username,packager_id)
     message = message.split
     if message.length < 2
-      return "Usage: /reject@pakreqBot <package name> <reason(optional)>",nil,nil
+      return "<b>Usage:</b> <code>/reject@pakreqBot &lt;package name&gt; &lt;reason(optional)&gt;</code>",nil,nil
     else
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
         @@logger.error("Unable to read database.")
-        return "Error reading the database, please contact the bot admin.",nil,nil
+        return "<b>Error reading the database, please contact the bot admin.</b>",nil,nil
       end
       pkglist[0].map do |arr|
         if (message[1] == arr[0])
@@ -524,17 +582,21 @@ class PAKREQBOT
             else
               packager = "@#{arr[3]}(#{arr[4]})"
             end
-            notification = "#{category} #{message[1]} rejected by #{packager}.\n"
-            notification = notification + "The reason is: #{reason}"
+            category = self.string_escape(category)
+            pkgname = self.string_escape(message[1])
+            packager = self.string_escape(packager)
+            reason = self.string_escape(reason)
+            notification = "<i>#{category}</i> <b>#{pkgname}</b> rejected by #{packager}.\n"
+            notification = notification + "<b>The reason is:</b> #{reason}"
             notification_requester = Array[arr[6],"❌ Your "+notification]
-            return "Successfully rejected #{message[1]}",notification,notification_requester
+            return "Successfully rejected <b>#{pkgname}</b>",notification,notification_requester
           else
             @@logger.error("Unable to reject #{message[1]}, please contact the bot admin.")
-            return "Unable to reject #{message[1]}, please contact the bot admin.",nil,nil
+            return "Unable to reject <b>#{message[1]}</b>, please contact the bot admin.",nil,nil
           end
         end
       end
-      return "Invalid request.",nil,nil
+      return "<b>Invalid request.</b>",nil,nil
     end
   end
 
@@ -542,66 +604,66 @@ class PAKREQBOT
     users = Database.user_list(@@db)
     if users[1] == false
       @@logger.error("Unable to read database.")
-      return "Error read user database, please contact the bot admin."
+      return "<b>Error read user database, please contact the bot admin.</b>"
     end
     if (users[0] != nil) and (users[0] != [])
       users[0].map do |arr|
         if (user_id == arr[0]) and (arr[4] == 1)
-          return "You already subscribed. Use /unsubscribe@pakreqBot to unsubscribe."
+          return "You <b>already</b> subscribed. Use <code>/unsubscribe@pakreqBot</code> to unsubscribe."
         elsif (user_id == arr[0]) and (arr[4] != 1)
           status = Database.user_set(@@db,"subscribe",user_id,true)
           if status == true
-            return "Successfully subscribed."
+            return "<b>Successfully subscribed.</b>"
           else
             @@logger.error("Unable to subscribe.")
-            return "Failed to subscribe. Please contact the bot admin."
+            return "<b>Failed to subscribe. Please contact the bot admin.</b>"
           end
         elsif (user_id == arr[0]) and (arr[3] != 1)
-          return "Due to the limitation of Telegram Bot API, bots cannot start chat with user directly. Please send /start to this bot."
+          return "<b>Due to the limitation of Telegram Bot API, bots <b>CANNOT</b> start chat with user directly. Please send <code>/start</code> to this bot.</b>"
         end
       end
     end
     if user_id != chat_id
-      return "Due to the limitation of Telegram Bot API, bots cannot start chat with user directly. Please send /start to this bot."
+      return "<b>Due to the limitation of Telegram Bot API, bots <b>CANNOT</b> start chat with user directly. Please send <code>/start</code> to this bot.</b>"
     else
       status = Database.user_reg(@@db,user_id,user_username)
       if status == false
         @@logger.error("Unable to register user.")
-        return "Failed to register user. Please contact the bot admin."
+        return "<b>Failed to register user. Please contact the bot admin.</b>"
       end
       status = Database.user_set(@@db,"session",user_id,true)
       if status == false
         @@logger.error("Unable to set session status.")
-        return "Failed to set session status. Please contact the bot admin."
+        return "<b>Failed to set session status. Please contact the bot admin.</b>"
       end
       status = Database.user_set(@@db,"subscribe",user_id,true)
       if status == true
-        return "Successfully subscribed."
+        return "<b>Successfully subscribed.</b>"
       else
         @@logger.error("Unable to subscribe.")
-        return "Failed to subscribe. Please contact the bot admin."
+        return "<b>Failed to subscribe. Please contact the bot admin.</b>"
       end
     end
-    return "Unknown error. Please contact the bot admin."
+    return "<b>Unknown error. Please contact the bot admin.</b>"
   end
 
   def self.user_unsubscribe(user_id)
     users = Database.user_list(@@db)
     if users[1] == false
       @@logger.error("Unable to read database.")
-      return "Error read user database, please contact the bot admin."
+      return "<b>Error read user database, please contact the bot admin.</b>"
     end
     users[0].map do |arr|
       if user_id == arr[0]
         status = Database.user_set(@@db,"subscribe",user_id,false)
         if status == true
-          return "Successfully unsubscribed."
+          return "<b>Successfully unsubscribed.</b>"
         else
-          return "Unsubscribe failed. Please contact the bot admin."
+          return "<b>Unsubscribe failed. Please contact the bot admin.</b>"
         end
       end
     end
-    return "This account didn't subscribed."
+    return "<b>This account didn't subscribed.</b>"
   end
 
   def self.user_start(user_id,user_username,chat_id)
@@ -609,7 +671,7 @@ class PAKREQBOT
       users = Database.user_list(@@db)
       if users[1] == false
         @@logger.error("Unable to read database.")
-        return "Error reading the database, please contact the bot admin."
+        return "<b>Error reading the database, please contact the bot admin.</b>"
       end
       if (users[0] != nil) and (users[0] != [])
         users[0].map do |arr|
@@ -620,12 +682,12 @@ class PAKREQBOT
             status = Database.user_reg(@@db,user_id,user_username)
             if status == false
               @@logger.error("Unable to register user.")
-              return "Failed to register user. Please contact the bot admin."
+              return "<b>Failed to register user. Please contact the bot admin.</b>"
             end
             status = Database.user_set(@@db,"session",user_id,true)
             if status == false
               @@logger.error("Unable to set session status.")
-              return "Failed to set session status. Please contact the bot admin."
+              return "<b>Failed to set session status. Please contact the bot admin.</b>"
             end
             response = self.display_help
             return response
@@ -635,12 +697,12 @@ class PAKREQBOT
         status = Database.user_reg(@@db,user_id,user_username)
         if status == false
           @@logger.error("Unable to register user.")
-          return "Failed to register user. Please contact the bot admin."
+          return "<b>Failed to register user. Please contact the bot admin.</b>"
         end
         status = Database.user_set(@@db,"session",user_id,true)
         if status == false
           @@logger.error("Unable to set session status.")
-          return "Failed to set session status. Please contact the bot admin."
+          return "<b>Failed to set session status. Please contact the bot admin.</b>"
         end
         response = self.display_help
         return response
@@ -651,22 +713,22 @@ class PAKREQBOT
   end
 
   def self.display_help
-    response = "A bot that designed to execute Jelly.\n"
-    response = response + "Command list:\n"
-    response = response + "/pakreq@pakreqBot <package name> <description(optional)> - Add a new pakreq.\n"
-    response = response + "/updreq@pakreqBot <package name> <description(optional)> - Add a new updreq.\n"
-    response = response + "/optreq@pakreqBot <package name> <description(optional)> - Add a new optreq.\n"
-    response = response + "/claim@pakreqBot <package name(leave it blank if you want to claim a package randomly)> - Claim a request.\n"
-    response = response + "/unclaim@pakreqBot <package name> - Unclaim  a request.\n"
-    response = response + "/done@pakreqBot <package name> - Mark a request as done.\n"
-    response = response + "/set_efd@pakreqBot <package name> <date> - Set estimate date of a request.\n"
-    response = response + "/reject@pakreqBot <package name> <reason(optional)> - Reject a request.\n"
-    response = response + "/list@pakreqBot <package name(optional)>- List pending requests.\n"
-    response = response + "/dlist@pakreqBot <package name(optional)>- List done requests.\n"
-    response = response + "/rlist@pakreqBot <package name(optional)>- List rejected requests.\n"
-    response = response + "/subscribe@pakreqBot - Subscribe.\n"
-    response = response + "/unsubcribe@pakreqBot - Unsubscribe.\n"
-    response = response + "/help@pakreqBot - Show this help message."
+    response = "A bot that DESIGNED to <b>execute Jelly.</b>\n"
+    response = response + "<b>Command list:</b>\n"
+    response = response + "<code>/pakreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code> - Add a new pakreq.\n"
+    response = response + "<code>/updreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code> - Add a new updreq.\n"
+    response = response + "<code>/optreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code> - Add a new optreq.\n"
+    response = response + "<code>/claim@pakreqBot &lt;package name(leave it blank if you want to claim a package randomly)&gt;</code> - Claim a request.\n"
+    response = response + "<code>/unclaim@pakreqBot &lt;package name&gt;</code> - Unclaim  a request.\n"
+    response = response + "<code>/done@pakreqBot &lt;package name&gt;</code> - Mark a request as done.\n"
+    response = response + "<code>/set_efd@pakreqBot &lt;package name&gt; &lt;date&gt;</code> - Set estimate date of a request.\n"
+    response = response + "<code>/reject@pakreqBot &lt;package name&gt; &lt;reason(optional)&gt;</code> - Reject a request.\n"
+    response = response + "<code>/list@pakreqBot &lt;package name(optional)&gt;</code> - List pending requests.\n"
+    response = response + "<code>/dlist@pakreqBot &lt;package name(optional)&gt;</code> - List done requests.\n"
+    response = response + "<code>/rlist@pakreqBot &lt;package name(optional)&gt;</code> - List rejected requests.\n"
+    response = response + "<code>/subscribe@pakreqBot</code> - Subscribe.\n"
+    response = response + "<code>/unsubcribe@pakreqBot</code> - Unsubscribe.\n"
+    response = response + "<code>/help@pakreqBot</code> - Show this help message."
     return response
   end
 
@@ -734,24 +796,30 @@ class PAKREQBOT
       bot.listen do |message|
         @@logger.info("Got a message from @#{message.from.username}: #{message.text}")
         response = self.message_parser(message)
-        if !(response[0] == nil) and !(response[0] == [])
-          bot.api.send_message(chat_id: message.chat.id, text: response[0], reply_to_message_id: message.message_id)
+        if !(response[0] == nil) and !(response[0] == []) and (response[0] != nil) and (response[0] != [])
+          bot.api.send_message(chat_id: message.chat.id, text: response[0], reply_to_message_id: message.message_id, parse_mode: "html")
         end
-        if !(response[1] == nil) and !(response[1] == [])
+        if !(response[1] == nil) and !(response[1] == []) and (response[1] != nil) and (response[1] != [])
           users = Database.user_list(@@db)
           if users[1] == false
             @@logger.error("Cannot load user list.")
           end
-          if !(users[0] == []) and !(users[0] == nil)
+          if !(users[0] == []) and !(users[0] == nil) and (users[0] != []) and (users[0] != nil)
             users[0].map do |arr|
-              if !(response[1] == nil) and (arr[3] == 1) and (arr[4] == 1) and !(arr[0] == message.chat.id) and !(arr[0] == response[2][0])
-                bot.api.send_message(chat_id: arr[0], text: response[1])
+              if (response[2] != nil) and (response[2] != [])
+                if (response[1] != nil) and (arr[3] == 1) and (arr[4] == 1) and !(arr[0] == message.chat.id) and !(arr[0] == response[2][0])
+                  bot.api.send_message(chat_id: arr[0], text: response[1], parse_mode: "html")
+                end
+              else
+                if (response[1] != nil) and (arr[3] == 1) and (arr[4] == 1) and !(arr[0] == message.chat.id)
+                  bot.api.send_message(chat_id: arr[0], text: response[1], parse_mode: "html")
+                end
               end
             end
           end
         end
         if !(response[2] == nil) and !(response[2] == []) and !(response[2][0] == message.chat.id)
-          bot.api.send_message(chat_id: response[2][0],text: response[2][1])
+          bot.api.send_message(chat_id: response[2][0],text: response[2][1], parse_mode: "html")
         end
       end
     end
