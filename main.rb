@@ -93,7 +93,7 @@ class PAKREQBOT
   def self.new_pakreq(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "<b>Usage:</b> <code>/pakreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code>",nil,nil
+      return "<b>Usage:</b> <code>/pakreq@pakreqBot &lt;package&gt; [description]</code>.",nil,nil
     end
     if (Packages_API.api_queue_pkg(message[1]) == false)
       pkglist = Database.pkg_list(@@db,"req")
@@ -125,7 +125,7 @@ class PAKREQBOT
       notification = "A new <i>pakreq</i> is added to the list!\n"
       notification = notification + "<b>#{pkgname}</b> - #{description}by @#{requester_username}"
       @@logger.info("A new pakreq: #{pkgname} - #{description}by @#{requester_username}")
-      return "Successfully added <b>#{pkgname}</b> to the <i>pakreq</i> listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+      return "Successfully added <b>#{pkgname}</b> to the <i>pakreq</i> listing.\n\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
     else
       pkgname = self.string_escape(message[1])
       return "#{pkgname} is already in the source.",nil,nil
@@ -135,7 +135,7 @@ class PAKREQBOT
   def self.new_updreq(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "<b>Usage:</b> <code>/updreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code>",nil,nil
+      return "<b>Usage:</b> <code>/updreq@pakreqBot &lt;package&gt; [description]</code>.",nil,nil
     end
     pkglist = Database.pkg_list(@@db,"req")
     if pkglist[1] == false
@@ -167,13 +167,13 @@ class PAKREQBOT
     notification = "A new <i>updreq</i> is added to the list!\n"
     notification = notification + "<b>#{pkgname}</b> - #{description}by @#{requester_username}"
     @@logger.info("A new updreq: #{pkgname} - #{description}by @#{requester_username}")
-    return "Successfully added to the <i>updreq</i> listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+    return "Successfully added to the <i>updreq</i> listing.\n\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
   end
 
   def self.new_optreq(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "<b>Usage:</b> <code>/optreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code>",nil,nil
+      return "<b>Usage:</b> <code>/optreq@pakreqBot &lt;package&gt; [description]</code>.",nil,nil
     end
     pkglist = Database.pkg_list(@@db,"req")
     if pkglist[1] == false
@@ -204,7 +204,7 @@ class PAKREQBOT
     notification = "A new <i>optreq</i> is added to the list!\n"
     notification = notification + "<b>#{pkgname}</b> - #{description}By @#{requester_username}"
     @@logger.info("A new optreq: #{pkgname} - #{description}by @#{requester_username}")
-    return "Successfully added to the <i>optreq</i> listing.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+    return "Successfully added to the <i>optreq</i> listing.\n\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
   end
 
   def self.list_pkg(message,table)
@@ -228,11 +228,11 @@ class PAKREQBOT
       if message.length < 2
         case table
         when "req"
-          response = "Pending requests:\n"
+          response = "Pending requests:\n\n"
         when "done"
-          response = "Done requests:\n"
+          response = "Done requests:\n\n"
         when "rejected"
-          response = "Rejected requests:\n"
+          response = "Rejected requests:\n\n"
         end
         pkglist[0].map do |arr|
           case arr[2]
@@ -258,13 +258,13 @@ class PAKREQBOT
               if arr[3] == nil
                 packager = "ID: ##{arr[4]}"
               else
-                packager = "@#{arr[3]}(#{arr[4]})"
+                packager = "@#{arr[3]} (#{arr[4]})"
               end
             end
             if arr[5] == nil
               requester = "ID: ##{arr[6]}"
             else
-              requester = "@#{arr[5]}(#{arr[6]})"
+              requester = "@#{arr[5]} (#{arr[6]})"
             end
             case arr[2]
             when 1
@@ -280,7 +280,7 @@ class PAKREQBOT
             packager = self.string_escape(packager)
             requester = self.string_escape(requester)
             date = self.string_escape(arr[7])
-            response = response + "Details of <b>#{pkgname}:</b>\n"
+            response = response + "Details of <b>#{pkgname}:</b>\n\n"
             response = response + "<b>Package name:</b> #{pkgname}\n"
             response = response + "<b>Description:</b> #{description}\n"
             response = response + "<b>Type:</b> <i>#{category}</i>\n"
@@ -349,14 +349,14 @@ class PAKREQBOT
               if (packager_username == nil)
                 packager = "ID: ##{packager_id}"
               else
-                packager = "@#{packager_username}(#{packager_id})"
+                packager = "@#{packager_username} (#{packager_id})"
               end
               pkgname = self.string_escape(arr[0])
               category = self.string_escape(category)
               packager = self.string_escape(packager)
               notification = "<i>#{category}</i> <b>#{pkgname}</b> claimed by #{packager}."
               notification_requester = Array[arr[6],"Your "+notification]
-              return "Successfully claimed request \"<b>#{pkgname}</b>\"\n#{self.list_pkg("/list@pakreqBot #{arr[0]}","req")}",notification,notification_requester
+              return "Successfully claimed request \"<b>#{pkgname}</b>\".\n\n#{self.list_pkg("/list@pakreqBot #{arr[0]}","req")}",notification,notification_requester
             end
           end
         end
@@ -365,7 +365,7 @@ class PAKREQBOT
       end
       return "<b>No unclaimed requests found.</b>",nil,nil
     elsif message.length > 2
-      return "<b>Invalid request. Usage:</b> /claim@pakreqBot &lt;package name(leave it blank if you want to claim a package randomly)&gt;",nil,nil
+      return "<b>Invalid request. Usage:</b> <code>/claim [package]</code>.",nil,nil
     else
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
@@ -378,7 +378,7 @@ class PAKREQBOT
           if status == false
             pkgname = self.string_escape(message[1])
             @@logger.error("Cannot claim request#{pkgname}")
-            return "Error claiming request <b>#{pkgname}</b>",nil,nil
+            return "Error claiming request <b>#{pkgname}</b>.",nil,nil
           else
             case arr[2]
             when 1
@@ -391,25 +391,25 @@ class PAKREQBOT
             if (packager_username == nil)
               packager = "ID: ##{packager_id}"
             else
-              packager = "@#{packager_username}(#{packager_id})"
+              packager = "@#{packager_username} (#{packager_id})"
             end
             pkgname = self.string_escape(message[1])
             category = self.string_escape(category)
             packager = self.string_escape(packager)
             notification = "<i>#{category}</i> <b>#{pkgname}</b> claimed by #{packager}."
             notification_requester = Array[arr[6],"Your "+notification]
-            return "Successfully claimed <i>#{category}</i> <b>#{pkgname}</b>.\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
+            return "Successfully claimed <i>#{category}</i> <b>#{pkgname}</b>.\n\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
           end
         end
       end
-      return "<i>Invalid request.</i>",nil,nil
+      return "<b>Invalid request.</b>",nil,nil
     end
   end
 
   def self.unclaim_pkg(message,requester_username,requester_id)
     message = message.split
     if message.length < 2
-      return "<b>Usage:</b> <code>/unclaim@pakreqBot &lt;package name&gt;</code>",nil,nil
+      return "<b>Usage:</b> <code>/unclaim@pakreqBot &lt;package&gt;</code>.",nil,nil
     elsif message.length == 2
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
@@ -436,30 +436,30 @@ class PAKREQBOT
               if (packager_username == nil)
                 packager = "ID: ##{packager_id}"
               else
-                packager = "@#{packager_username}(#{packager_id})"
+                packager = "@#{packager_username} (#{packager_id})"
               end
               category = self.string_escape(category)
               pkgname = self.string_escape(message[1])
               packager = self.string_escape(packager)
               notification = "#{category} #{pkgname} unclaimed by #{packager}"
               notification_requester = Array[arr[6],"Your "+notification]
-              return "Successfully unclaimed <i>#{category}</i> <b>#{message[1]}</b>\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
+              return "Successfully unclaimed <i>#{category}</i> <b>#{message[1]}</b>.\n\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
             end
           else
             return "<b>ONLY</b> the people who claimed this package can unclaim it.",nil,nil
           end
         end
       end
-      return "<b>Invalid request. Usage:</b> <code>/unclaim@pakreqBot &lt;package name&gt;</code>",nil,nil
+      return "<b>Invalid request. Usage:</b> <code>/unclaim@pakreqBot &lt;package&gt;</code>.",nil,nil
     end
   end
 
-  def self.set_efd(message,requester_id)
+  def self.set_eta(message,requester_id)
     message = message.split
     if message.length < 2
-      return "<b>Usage:</b> <code>/setefd@pakreqBot &lt;package name&gt; &lt;date(format:YYYY-mm-dd)&gt;</code>",nil,nil
+      return "<b>Usage:</b> <code>/set_eta@pakreqBot &lt;package&gt; &lt;date(format:YYYY-mm-dd)&gt;</code>.",nil,nil
     elsif message.length == 2
-      return "Invalid request. <b>Usage:</b> <code>/setefd@pakreqBot &lt;package name&gt; &lt;date(format:YYYY-mm-dd)&gt;</code>",nil,nil
+      return "Invalid request. <b>Usage:</b> <code>/set_eta@pakreqBot &lt;package&gt; &lt;date(format:YYYY-mm-dd)&gt;</code>.",nil,nil
     elsif message.length > 2
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
@@ -477,17 +477,17 @@ class PAKREQBOT
             when 3
               category = "optreq"
             end
-            efd = ""
+            eta = ""
             for num in 2..message.length do
-              efd = efd + "#{message[num]} "
+              eta = eta + "#{message[num]} "
             end
-            Database.pkg_set_efd(@@db,message[1],efd)
-            efd = self.string_escape(efd)
+            Database.pkg_set_eta(@@db,message[1],eta)
+            eta = self.string_escape(eta)
             category = self.string_escape(category)
             pkgname = self.string_escape(arr[0])
-            notification = "#{category} #{pkgname}'s estimated date set to #{efd}"
+            notification = "#{category} #{pkgname}'s estimated date set to #{eta}"
             notification_requester = Array[arr[6],"Your "+notification]
-            return "Successfully set estimated date to #{efd}.",notification,notification_requester
+            return "Successfully set estimated date to #{eta}.",notification,notification_requester
           else
             return "<b>ONLY</b> the one who claimed this package can set estimate date.",nil,nil
           end
@@ -496,15 +496,15 @@ class PAKREQBOT
       pkgname = self.string_escape(message[1])
       return "<b>#{pkgname}</b> isn't in the pending list.",nil,nil
     end
-    return "<b>Invalid request. Usage:</b> <code>/setefd@pakreqBot &lt;package name&gt; &lt;date(format:YYYY-mm-dd)&gt;</code>",nil,nil
+    return "<b>Invalid request. Usage:</b> <code>/seteta@pakreqBot &lt;package&gt; &lt;date(format:YYYY-mm-dd)&gt;</code>.",nil,nil
   end
 
   def self.mark_done(message,requester_id)
     message = message.split
     if message.length < 2
-      return "<b>Usage:</b> <code>/done@pakreqBot &lt;package name&gt;</code>",nil,nil
+      return "<b>Usage:</b> <code>/done@pakreqBot &lt;package&gt;</code>.",nil,nil
     elsif message.length > 2
-      return "<b>Invalid request. Usage:</b> <code>/done@pakreqBot &lt;package name&gt;</code>",nil,nil
+      return "<b>Invalid request. Usage:</b> <code>/done@pakreqBot &lt;package&gt;</code>.",nil,nil
     else
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
@@ -531,14 +531,14 @@ class PAKREQBOT
             if arr[3] == nil
               packager = "ID: ##{arr[4]}"
             else
-              packager = "@#{arr[3]}(#{arr[4]})"
+              packager = "@#{arr[3]} (#{arr[4]})"
             end
             packager = self.string_escape(packager)
             category = self.string_escape(category)
             pkgname = self.string_escape(message[1])
             notification = "<i>#{category}</i> <b>#{pkgname}</b> marked as <b>DONE by #{packager}.</b>"
             notification_requester = Array[arr[6],"✅ Your "+notification]
-            return "✅ Marked <b>#{pkgname}</b> as <b>DONE</b>.\n#{self.list_pkg("/list@pakreqBot","req")}",notification,notification_requester
+            return "✅ Marked <b>#{pkgname}</b> as <b>DONE</b>.\n\n#{self.list_pkg("/list@pakreqBot","req")}",notification,notification_requester
           else
             return "<b>ONLY</b> the people who claimed the package can mark it as done.",nil,nil
           end
@@ -551,7 +551,7 @@ class PAKREQBOT
   def self.reject_pkg(message,packager_username,packager_id)
     message = message.split
     if message.length < 2
-      return "<b>Usage:</b> <code>/reject@pakreqBot &lt;package name&gt; &lt;reason(optional)&gt;</code>",nil,nil
+      return "<b>Usage:</b> <code>/reject@pakreqBot &lt;package&gt; [reason]</code>.",nil,nil
     else
       pkglist = Database.pkg_list(@@db,"req")
       if pkglist[1] == false
@@ -580,7 +580,7 @@ class PAKREQBOT
             if packager_username == nil
               packager = "ID: #{arr[4]}"
             else
-              packager = "@#{arr[3]}(#{arr[4]})"
+              packager = "@#{arr[3]} (#{arr[4]})"
             end
             category = self.string_escape(category)
             pkgname = self.string_escape(message[1])
@@ -589,7 +589,7 @@ class PAKREQBOT
             notification = "<i>#{category}</i> <b>#{pkgname}</b> rejected by #{packager}.\n"
             notification = notification + "<b>The reason is:</b> #{reason}"
             notification_requester = Array[arr[6],"❌ Your "+notification]
-            return "Successfully rejected <b>#{pkgname}</b>",notification,notification_requester
+            return "Successfully rejected <b>#{pkgname}</b>.",notification,notification_requester
           else
             @@logger.error("Unable to reject #{message[1]}, please contact the bot admin.")
             return "Unable to reject <b>#{message[1]}</b>, please contact the bot admin.",nil,nil
@@ -713,22 +713,22 @@ class PAKREQBOT
   end
 
   def self.display_help
-    response = "A bot that DESIGNED to <b>execute Jelly.</b>\n"
+    response = "A bot designed to <b>EXECUTE</b> Jelly.\n\n"
     response = response + "<b>Command list:</b>\n"
-    response = response + "<code>/pakreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code> - Add a new pakreq.\n"
-    response = response + "<code>/updreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code> - Add a new updreq.\n"
-    response = response + "<code>/optreq@pakreqBot &lt;package name&gt; &lt;description(optional)&gt;</code> - Add a new optreq.\n"
-    response = response + "<code>/claim@pakreqBot &lt;package name(leave it blank if you want to claim a package randomly)&gt;</code> - Claim a request.\n"
-    response = response + "<code>/unclaim@pakreqBot &lt;package name&gt;</code> - Unclaim  a request.\n"
-    response = response + "<code>/done@pakreqBot &lt;package name&gt;</code> - Mark a request as done.\n"
-    response = response + "<code>/set_efd@pakreqBot &lt;package name&gt; &lt;date&gt;</code> - Set estimate date of a request.\n"
-    response = response + "<code>/reject@pakreqBot &lt;package name&gt; &lt;reason(optional)&gt;</code> - Reject a request.\n"
-    response = response + "<code>/list@pakreqBot &lt;package name(optional)&gt;</code> - List pending requests.\n"
-    response = response + "<code>/dlist@pakreqBot &lt;package name(optional)&gt;</code> - List done requests.\n"
-    response = response + "<code>/rlist@pakreqBot &lt;package name(optional)&gt;</code> - List rejected requests.\n"
-    response = response + "<code>/subscribe@pakreqBot</code> - Subscribe.\n"
-    response = response + "<code>/unsubcribe@pakreqBot</code> - Unsubscribe.\n"
-    response = response + "<code>/help@pakreqBot</code> - Show this help message."
+    response = response + "<code>/pakreq &lt;package&gt; [description]</code> - Add a new pakreq.\n"
+    response = response + "<code>/updreq &lt;package&gt; [description]</code> - Add a new updreq.\n"
+    response = response + "<code>/optreq &lt;package&gt; [description]</code> - Add a new optreq.\n"
+    response = response + "<code>/claim [package]</code> - Claim a request, leave <code>[package]</code> for a random claim.\n"
+    response = response + "<code>/unclaim &lt;package&gt;</code> - Unclaim  a request.\n"
+    response = response + "<code>/done &lt;package&gt;</code> - Mark a request as done.\n"
+    response = response + "<code>/set_eta &lt;package&gt; &lt;date(format:YYYY-mm-dd)&gt;</code> - Set an estimated date for a request.\n"
+    response = response + "<code>/reject &lt;package&gt; [reason]</code> - Reject a request.\n"
+    response = response + "<code>/list [package]</code> - List pending requests.\n"
+    response = response + "<code>/dlist [package]</code> - List done requests.\n"
+    response = response + "<code>/rlist [package]</code> - List rejected requests.\n"
+    response = response + "<code>/subscribe</code> - Subscribe.\n"
+    response = response + "<code>/unsubcribe</code> - Unsubscribe.\n"
+    response = response + "<code>/help</code> - Show this help message."
     return response
   end
 
@@ -755,8 +755,8 @@ class PAKREQBOT
     when /\/unclaim/
       response = self.unclaim_pkg(message.text,message.from.username,message.from.id)
       return response
-    when /\/set_efd/
-      response = self.set_efd(message.text,message.from.id)
+    when /\/set_eta/
+      response = self.set_eta(message.text,message.from.id)
       return response
     when /\/done/
       response = self.mark_done(message.text,message.from.id)
