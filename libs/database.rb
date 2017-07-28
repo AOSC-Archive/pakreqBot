@@ -139,6 +139,7 @@ module Database
     db.execute("UPDATE pakreq SET packager_username = ? WHERE pkgname = ?",[nil,pkgname])
     db.execute("UPDATE pakreq SET packager_id = ? WHERE pkgname = ?",[nil,pkgname])
     db.execute("UPDATE pakreq SET expected_finishing_date = ? WHERE pkgname = ?",[nil,pkgname])
+    return true
   end
 
   def self.pkg_done(db,pkgname,requester_id)

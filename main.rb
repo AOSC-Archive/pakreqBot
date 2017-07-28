@@ -82,12 +82,16 @@ class PAKREQBOT
     @@logger.info("Bot started...")
   end
 
-  def self.string_escape(message)
-    response = message.to_s
-    response = response.gsub(/\&/,"&amp;")
-    response = response.gsub(/\</,"&lt;")
-    response = response.gsub(/\>/,"&gt;")
-    return response
+  def self.request_catagory(catagory)
+    case catagory
+    when 1
+      return "pakreq",true
+    when 2
+      return "updreq",true
+    when 3
+      return "optreq",true
+    end
+    return nil,false
   end
 
   def self.new_pakreq(message,requester_username,requester_id)
@@ -125,7 +129,7 @@ class PAKREQBOT
       notification = "A new <i>pakreq</i> is added to the list!\n"
       notification = notification + "<b>#{pkgname}</b> - #{description}by @#{requester_username}"
       @@logger.info("A new pakreq: #{pkgname} - #{description}by @#{requester_username}")
-      return "Successfully added <b>#{pkgname}</b> to the <i>pakreq</i> listing.\n\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+      return "Successfully added <b>#{pkgname}</b> to the <i>pakreq</i> listing.",notification,nil
     else
       pkgname = self.string_escape(message[1])
       return "#{pkgname} is already in the source.",nil,nil
@@ -167,7 +171,7 @@ class PAKREQBOT
     notification = "A new <i>updreq</i> is added to the list!\n"
     notification = notification + "<b>#{pkgname}</b> - #{description}by @#{requester_username}"
     @@logger.info("A new updreq: #{pkgname} - #{description}by @#{requester_username}")
-    return "Successfully added to the <i>updreq</i> listing.\n\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+    return "Successfully added to the <i>updreq</i> listing.",notification,nil
   end
 
   def self.new_optreq(message,requester_username,requester_id)
@@ -204,7 +208,7 @@ class PAKREQBOT
     notification = "A new <i>optreq</i> is added to the list!\n"
     notification = notification + "<b>#{pkgname}</b> - #{description}By @#{requester_username}"
     @@logger.info("A new optreq: #{pkgname} - #{description}by @#{requester_username}")
-    return "Successfully added to the <i>optreq</i> listing.\n\n#{self.list_pkg("/list@pakreqBot","req")}",notification,nil
+    return "Successfully added to the <i>optreq</i> listing.",notification,nil
   end
 
   def self.list_pkg(message,table)
@@ -538,7 +542,7 @@ class PAKREQBOT
             pkgname = self.string_escape(message[1])
             notification = "<i>#{category}</i> <b>#{pkgname}</b> marked as <b>DONE by #{packager}.</b>"
             notification_requester = Array[arr[6],"✅ Your "+notification]
-            return "✅ Marked <b>#{pkgname}</b> as <b>DONE</b>.\n\n#{self.list_pkg("/list@pakreqBot","req")}",notification,notification_requester
+            return "✅ Marked <b>#{pkgname}</b> as <b>DONE</b>.",notification,notification_requester
           else
             return "<b>ONLY</b> the people who claimed the package can mark it as done.",nil,nil
           end
@@ -815,11 +819,11 @@ class PAKREQBOT
                   bot.api.send_message(chat_id: arr[0], text: response[1], parse_mode: "html")
                 end
               end
+              if !(response[2] == nil) and !(response[2] == []) and (response[2][0] == arr[0]) and !(response[2][0] == message.chat.id) and (arr[3] == 1)
+                bot.api.send_message(chat_id: response[2][0],text: response[2][1], parse_mode: "html")
+              end
             end
           end
-        end
-        if !(response[2] == nil) and !(response[2] == []) and !(response[2][0] == message.chat.id)
-          bot.api.send_message(chat_id: response[2][0],text: response[2][1], parse_mode: "html")
         end
       end
     end
