@@ -82,16 +82,12 @@ class PAKREQBOT
     @@logger.info("Bot started...")
   end
 
-  def self.request_catagory(catagory)
-    case catagory
-    when 1
-      return "pakreq",true
-    when 2
-      return "updreq",true
-    when 3
-      return "optreq",true
-    end
-    return nil,false
+  def self.string_escape(message)
+    response = message.to_s
+    response = response.gsub(/\&/,"&amp;")
+    response = response.gsub(/\</,"&lt;")
+    response = response.gsub(/\>/,"&gt;")
+    return response
   end
 
   def self.new_pakreq(message,requester_username,requester_id)
