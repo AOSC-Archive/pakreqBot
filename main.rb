@@ -7,13 +7,17 @@
 # This work is free. You can redistribute it and/or modify it under the
 # terms of the Do What The Fuck You Want To Public License, Version 2,
 # as published by Sam Hocevar. See the LICENSE file for more details.
+require 'rubygems'
+require 'bundler/setup'
 
 require 'yaml'
+require 'sinatra'
 require 'logger'
 require 'rbconfig'
 require 'telegram/bot'
 require_relative 'libs/database.rb'
 require_relative 'libs/packages_api.rb'
+require_relative 'libs/api.rb'
 
 class MultiDelegator
   def initialize(*targets)
@@ -830,5 +834,6 @@ class PAKREQBOT
 end
 
 loop do
+  Thread.new{ PAKREQAPI.run! }
   PAKREQBOT.start
 end
