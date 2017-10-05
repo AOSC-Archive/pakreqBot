@@ -796,7 +796,10 @@ class PAKREQBOT
       bot.listen do |message|
         @@logger.info("Got a message from @#{message.from.username}: #{message.text}")
         response = self.message_parser(message)
-        if !(response[0] == nil) and !(response[0] == []) and (response[0] != nil) and (response[0] != [])
+        if !(response[0] == nil) and !(response[0] == "")
+          @@logger.info("Response length: #{response[0].length}")
+        end
+        if !(response[0] == nil) and !(response[0] == []) and (response[0] != nil) and (response[0] != []) and (response[0].length < 4000)
           bot.api.send_message(chat_id: message.chat.id, text: response[0], reply_to_message_id: message.message_id, parse_mode: "html")
         end
         if !(response[1] == nil) and !(response[1] == []) and (response[1] != nil) and (response[1] != [])
