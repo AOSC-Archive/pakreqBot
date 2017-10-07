@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-material/0.7.5/vue-material.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twix.js/1.2.1/twix.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.3.4/vue-resource.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="index.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vue-material/0.7.5/vue-material.css" />
+  <title>pakreq!!!</title>
+  <meta content="">
+  <style></style>
+</head>
+
+<body>
+  <div id="pakreqweb">
+    <md-toolbar>
+      <md-button class="md-icon-button" @click="toggleLeftSidenav">
+        <md-icon>menu</md-icon>
+      </md-button>
+      <h1 class="md-title">PakReq!!!</h1>
+    </md-toolbar>
+    <md-sidenav md-swipeable class="md-left" ref="sidenav">
+      <md-toolbar class="md-large">
+        <div class="md-toolbar-container">
+          <a href="#">
+            <img src="pakreq_banner.jpg" alt="PakReq" />
+          </a>
+        </div>
+      </md-toolbar>
+      <md-list>
+        <md-list-item @click="$refs.sidenav.toggle()">
+          <md-icon>home</md-icon><span>Home</span></md-list-item>
+        <md-list-item @click="$refs.sidenav.toggle()">
+          <md-icon>settings</md-icon><span>Settings</span></md-list-item>
+      </md-list>
+    </md-sidenav>
+
+    <div class="main-content">
+      <md-table v-if="tb_loaded">
+        <md-table-header>
+          <md-table-row>
+            <md-table-head>Package</md-table-head>
+            <md-table-head>Description</md-table-head>
+            <md-table-head>Request Type</md-table-head>
+            <md-table-head>Claimed By</md-table-head>
+            <md-table-head>Requested By</md-table-head>
+            <md-table-head>Requested Date</md-table-head>
+            <md-table-head>ETA</md-table-head>
+          </md-table-row>
+        </md-table-header>
+
+        <md-table-body>
+          <md-table-row v-for="(entry, rIndex) in reqtable" :key="entry.id" :md-item="entry">
+            <md-table-cell v-for="(item, index) in entry" :key="index">
+              {{item}}
+            </md-table-cell>
+          </md-table-row>
+        </md-table-body>
+      </md-table>
+      <div v-else-if="!tb_loaded" style="display:flex;justify-content:center;align-items:center;">
+        <md-spinner md-indeterminate></md-spinner>
+        <h3 class="after_icon">Retrieving data...</h3>
+      </div>
+      <md-snackbar v-show="tb_error" md-position="top center" ref="snackbar" :md-duration="snkbar.dur">
+        <md-icon md-warn>error</md-icon><span>&nbsp;Unable to fetch data.</span>
+        <md-spinner :md-size="20" md-indeterminate v-if="!tb_loaded"></md-spinner>
+        <md-button v-if="tb_loaded" class="md-accent" md-theme="light-blue" @click="retryFetch()">Retry</md-button>
+      </md-snackbar>
+    </div>
+  </div>
+  <script src="index.js"></script>
+</body>
+
+</html>
