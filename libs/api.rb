@@ -23,9 +23,17 @@ class PAKREQAPI < Sinatra::Base
     super(app)
   end
 
+  set :root, Proc.new {File.join(File.dirname(__FILE__), "../")}
+  set :public_folder, Proc.new { File.join(root, "html") }
+  set :static_cache_control, [:public, :max_age => 1800]
+
   # for diagnosis purpose
   get '/ping' do
     204
+  end
+
+  get '/' do
+    redirect '/index.html', 301
   end
 
   # list pending reqs
