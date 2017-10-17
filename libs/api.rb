@@ -23,6 +23,7 @@ class PAKREQAPI < Sinatra::Base
     super(app)
   end
 
+  set :bind, '0.0.0.0'
   set :root, Proc.new {File.join(File.dirname(__FILE__), "../")}
   set :public_folder, Proc.new { File.join(root, "html") }
   set :static_cache_control, [:public, :max_age => 1800]

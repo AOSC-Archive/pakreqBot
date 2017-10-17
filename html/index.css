@@ -7,3 +7,8 @@
 .after_icon {
   float: left;
 }
+
+.nav_right {
+  float: right!important;
+  margin-right: -30px;
+}

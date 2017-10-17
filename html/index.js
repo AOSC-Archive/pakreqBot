@@ -9,7 +9,6 @@ var vm = new Vue({
     },
     fetchReqList: function() {
       this.$http.get('/api/lists.json').then(response => {
-        this.tb_loaded = true;
         if (response.body.status != 0) {
           this.$refs.snackbar.open();
           this.tb_error = true;
@@ -22,7 +21,7 @@ var vm = new Vue({
         }
         this.$refs.snackbar.close();
         this.tb_error = false;
-        this.$forceUpdate();
+        this.tb_loaded = true;
       }, err => {
         this.$refs.snackbar.open();
         this.tb_error = true;

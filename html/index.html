@@ -12,7 +12,10 @@
   <link rel="stylesheet" href="index.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vue-material/0.7.5/vue-material.css" />
   <title>pakreq!!!</title>
-  <meta content="">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
   <style></style>
 </head>
 
@@ -22,7 +25,8 @@
       <md-button class="md-icon-button" @click="toggleLeftSidenav">
         <md-icon>menu</md-icon>
       </md-button>
-      <h1 class="md-title">PakReq!!!</h1>
+      <h1 class="md-title" style="flex: 1;">PakReq!!!</h1>
+      <span v-show="tb_loaded && !tb_error">{{reqtable.length}} pakreqs pending</span>
     </md-toolbar>
     <md-sidenav md-swipeable class="md-left" ref="sidenav">
       <md-toolbar class="md-large">
@@ -62,14 +66,16 @@
           </md-table-row>
         </md-table-body>
       </md-table>
-      <div v-else-if="!tb_loaded" style="display:flex;justify-content:center;align-items:center;">
+      <div style="flex: 1;" v-else-if="!tb_loaded" style="display:flex;justify-content:center;align-items:center;">
         <md-spinner md-indeterminate></md-spinner>
         <h3 class="after_icon">Retrieving data...</h3>
       </div>
       <md-snackbar v-show="tb_error" md-position="top center" ref="snackbar" :md-duration="snkbar.dur">
-        <md-icon md-warn>error</md-icon><span>&nbsp;Unable to fetch data.</span>
-        <md-spinner :md-size="20" md-indeterminate v-if="!tb_loaded"></md-spinner>
-        <md-button v-if="tb_loaded" class="md-accent" md-theme="light-blue" @click="retryFetch()">Retry</md-button>
+        <div>
+          <md-icon style="flex: 1;" md-warn>error</md-icon><span>&nbsp;Unable to fetch data.</span>
+        </div>
+          <md-spinner :md-size="20" md-indeterminate v-if="!tb_loaded"></md-spinner>
+          <md-button v-if="tb_loaded" class="md-accent" md-theme="light-blue" @click="retryFetch()">Retry</md-button>
       </md-snackbar>
     </div>
   </div>
