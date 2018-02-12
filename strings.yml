@@ -1,0 +1,149 @@
+# Language file
+
+# misc
+pakreq: "pakreq"
+updreq: "updreq"
+optreq: "optreq"
+nobody: "<nobody>"
+unknown: "<unknown>"
+no_description: "<no description>"
+
+# config
+config_file_missing: "Config file not found, aborting...\nPlease run \"rake mkconfig\" before starting the bot."
+
+# Database
+database_missing: "Database not found, aborting...\nPlease run \"rake mkconfig\" before starting the bot."
+database_read_failed: "<b>Error reading the database, please contact the bot admin.</b>"
+
+# error
+unknown_error: "<b>Unknown error, please contact the bot admin.</b>"
+invalid_request: "<b>Invalid request.</b>"
+
+# pakreq
+pakreq_usage: "<b>Usage:</b> <code>/pakreq@pakreqBot &lt;package&gt; [description]</code>."
+pakreq_exists_before: "\"<b>"
+pakreq_exists_after: "</b>\" is <b>ALREADY</b> in the <i>pakreq</i> list."
+pakreq_fail_before: "❌ <b>FAILED</b> to add <i>pakreq</i> \"<b>"
+pakreq_fail_after: "</b>\", please contact the bot admin."
+pakreq_notification_subscribers: "A new <i>pakreq</i> is added to the list:\n"
+pakreq_new_before: "✅ Successfully added \"<b>"
+pakreq_new_after: "</b>\" to the <i>pakreq</i> listing."
+
+# udpreq
+udpreq_usage: "<b>Usage:</b> <code>/updreq@pakreqBot &lt;package&gt; [description]</code>."
+updreq_exists_before: "\"<b>"
+updreq_exists_after: "</b>\" is <b>ALREADY</b> in the <i>updreq</i> list."
+updreq_fail_before: "❌ <b>FAILED</b> to add <i>updreq</i> \"<b>"
+updreq_fail_after: "</b>\", please contact the bot admin."
+updreq_notification_subscribers: "A new <i>updreq</i> is added to the list:\n"
+updreq_new_before: "✅ Successfully added \"<b>"
+updreq_new_after: "</b>\" to the <i>updreq</i> listing."
+
+# optreq
+optreq_usage: "<b>Usage:</b> <code>/optreq@pakreqBot &lt;package&gt; [description]</code>."
+optreq_exists_before: "\"<b>"
+optreq_exists_after: "</b>\" is <b>ALREADY</b> in the <i>optreq</i> list."
+optreq_fail_before: "❌ <b>FAILED</b> to add <i>optreq</i> \"<b>"
+optreq_fail_after: "</b>\", please contact the bot admin."
+optreq_notification_subscribers: "A new <i>optreq</i> is added to the list:\n"
+optreq_new_before: "✅ Successfully added \"<b>"
+pakreq_new_after: "</b>\" to the <i>optreq</i> listing."
+
+# list
+list_no_pending: "<b>No pending requests found.</b>"
+list_no_done: "<b>No done requests found.</b>"
+list_no_rejected: "<b>No rejected requests found.</b>"
+list_header_pending: "<b>Pending requests:</b>\n\n"
+list_header_done: "<b>Done requests:</b>\n\n"
+list_header_rejected: "<b>Rejected requests:</b>\n\n"
+list_details_header_before: "Details of \"<b>"
+list_details_header_after: ":</b>\"\n\n"
+list_details_pkgname_before: "<b>Package name:</b> "
+list_details_pkgname_after: "\n"
+list_details_desc_before: "<b>Description:</b> "
+list_details_desc_after: "\n"
+list_details_type_before: "<b>Type:</b> <i>"
+list_details_type_after: "</i>\n"
+list_details_packager_before: "<b>Packager:</b> "
+list_details_packager_after: "\n"
+list_details_requester_before: "<b>Requester:</b> "
+list_details_requester_after: "\n"
+list_details_date_before: "<b>Date:</b> "
+list_details_date_after: "\n"
+list_details_reason_before: "<b>Reason:</b> "
+list_details_reason_after: "\n"
+
+# claim
+claim_usage: "<b>Usage:</b> <code>/claim [package]</code>."
+claim_fail_before: "❌ <b>FAILED</b> to claim the request \"<b>"
+claim_fail_after: "</b>\", please contact the bot admin.</b>"
+claim_success_before: "✅ Successfully claimed request \"<b>"
+claim_success_after: "</b>\".\n\n"
+claim_no_unclaimed: "<b>No unclaimed requests found.</b>"
+
+# unclaim
+unclaim_usage: "<b>Usage:</b> <code>/unclaim@pakreqBot &lt;package&gt;</code>."
+unclaim_fail_before: "❌ <b>FAILED</b> to unclaim \"<b>"
+unclaim_fail_after: "</b>\", please contact the bot admin."
+unclaim_success_before: "✅ Successfully unclaimed <i>"
+unclaim_success_middle: "</i> \"<b>"
+unclaim_success_after: "</b>\"."
+unclaim_unauthorized: "❌ <b>ONLY</b> the people who claimed this package can unclaim it."
+
+# set_eta
+set_eta_usage: "<b>Usage:</b> <code>/set_eta@pakreqBot &lt;package&gt; &lt;date(format:YYYY-mm-dd)&gt;</code>."
+set_eta_success_before: "✅ Successfully set estimated date to <b>"
+set_eta_success_after: "</b>."
+set_eta_unauthorized: "❌ <b>ONLY</b> the one who claimed this package can set estimate date."
+set_eta_not_found_before: "❌ \"<b>"
+set_eta_not_found_after: "</b>\" isn't in the pending list."
+
+# mark_done
+done_usage: "<b>Usage:</b> <code>/done@pakreqBot &lt;package&gt;</code>."
+done_success_before: "✅ Successfully marked <b>"
+done_success_after: "</b> as done."
+done_fail_before: "❌ <b>FAILED</b> to mark <b>"
+done_fail_after: "</b> as done."
+done_unauthorized: "❌ <b>ONLY</b> the people who claimed this package can mark it done."
+set_eta_not_found_before: "❌ \"<b>"
+set_eta_not_found_after: "</b>\" isn't in the pending list."
+
+# reject
+reject_usage: "<b>Usage:</b> <code>/reject@pakreqBot &lt;package&gt; [reason]</code>."
+reject_success_before: "✅ Successfully rejected <b>"
+reject_success_before: "</b>"
+reject_fail_before: "❌ <b>FAILED</b> to reject <b>"
+reject_fail_after: "</b>"
+
+# register
+register_fail: "❌ <b>FAILED</b> to register user. Please contact the bot admin."
+register_fail_session: "❌ <b>FAILED</b> to set session status. Please contact the bot admin."
+
+# subcribe
+subscribe_already: "You <b>already</b> subscribed. Use <code>/unsubscribe@pakreqBot</code> to unsubscribe."
+subscribe_success: "✅ <b>Successfully subscribed.</b>"
+subscribe_fail: "❌ <b>FAILED</b> to subscribe. Please contact the bot admin."
+subscribe_create_session: "<b>Due to the limitation of Telegram Bot API, bots <b>CANNOT</b> start chat with user directly. Please send <code>/start</code> to this bot.</b>"
+
+# unsubscribe
+unsubscribe_success: "✅ <b>Successfully unsubscribed.</b>"
+unsubscribe_fail: "❌ <b>FAILED</b> to unsubscibe. Please contact the bot admin."
+unsubscribe_not_subscribed: "<b>This account didn't subscribe yet.</b>"
+
+#help
+help_title: "A bot designed to <b>EXECUTE</b> Jelly.\n\n"
+help_command_list_title: "<b>Command list:</b>\n"
+help_pakreq: "<code>/pakreq &lt;package&gt; [description]</code> - Add a new pakreq.\n"
+help_updreq: "<code>/updreq &lt;package&gt; [description]</code> - Add a new updreq.\n"
+help_optreq: "<code>/optreq &lt;package&gt; [description]</code> - Add a new optreq.\n"
+help_claim: "<code>/claim [package]</code> - Claim a request, leave <code>[package]</code> for a random claim.\n"
+help_unclaim: "<code>/unclaim &lt;package&gt;</code> - Unclaim  a request.\n"
+help_done: "<code>/done &lt;package&gt;</code> - Mark a request as done.\n"
+help_set_eta: "<code>/set_eta &lt;package&gt; &lt;date(format:YYYY-mm-dd)&gt;</code> - Set an estimated date for a request.\n"
+help_reject: "<code>/reject &lt;package&gt; [reason]</code> - Reject a request.\n"
+help_list: "<code>/list [package]</code> - List pending requests.\n"
+help_done_list: "<code>/dlist [package]</code> - List done requests.\n"
+help_rejected_list: "<code>/rlist [package]</code> - List rejected requests.\n"
+help_subscribe: "<code>/subscribe</code> - Subscribe.\n"
+help_unsubscribe: <code>/unsubcribe</code> - Unsubscribe.\n"
+help_help: "<code>/help</code> - Show this help message."
