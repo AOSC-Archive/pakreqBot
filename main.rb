@@ -437,10 +437,10 @@ class PAKREQBOT
               when 3
                 category = "optreq"
               end
-              if (packager_username == nil)
+              if (requester_username == nil)
                 packager = "ID: ##{packager_id}"
               else
-                packager = "@#{packager_username} (#{packager_id})"
+                packager = "@#{requester_username} (#{requester_id})"
               end
               category = self.string_escape(category)
               pkgname = self.string_escape(message[1])
