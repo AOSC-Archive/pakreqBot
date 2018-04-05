@@ -738,52 +738,52 @@ class PAKREQBOT
 
   def self.message_parser(message)
     case message.text
-    when /\/start/
+    when /^\/start$/
       response = self.user_start(message.from.id,message.from.username,message.chat.id)
       return response,nil,nil
-    when /\/help/
+    when /^\/help$/
       response = self.display_help
       return response,nil,nil
-    when /\/pakreq/
+    when /^(\/pakreq$)|(\/pakreq )/
       response = self.new_pakreq(message.text,message.from.username,message.from.id)
       return response
-    when /\/updreq/
+    when /^(\/updreq$)|(\/updreq )/
       response = self.new_updreq(message.text,message.from.username,message.from.id)
       return response
-    when /\/optreq/
+    when /^(\/optreq$)|(\/optreq )/
       response = self.new_optreq(message.text,message.from.username,message.from.id)
       return response
-    when /\/claim/
+    when /^(\/claim$)|(\/claim )/
       response = self.claim_pkg(message.text,message.from.username,message.from.id)
       return response
-    when /\/unclaim/
+    when /^(\/unclaim$)|(\/unclaim )/
       response = self.unclaim_pkg(message.text,message.from.username,message.from.id)
       return response
-    when /\/set_eta/
+    when /^(\/set_eta$)|(\/set_eta )/
       response = self.set_eta(message.text,message.from.id)
       return response
-    when /\/done/
+    when /^(\/done$)|(\/done )/
       response = self.mark_done(message.text,message.from.id)
       return response
-    when /\/reject/
+    when /^(\/reject$)|(\/reject )/
       response = self.reject_pkg(message.text,message.from.username,message.from.id)
       return response
-    when /\/list/
+    when /^(\/list$)|(\/list )/
       response = self.list_pkg(message.text,"req")
       return response,nil,nil
-    when /\/dlist/
+    when /^(\/dlist$)|(\/dlist )/
       response = self.list_pkg(message.text,"done")
       return response,nil,nil
-    when /\/rlist/
+    when /^(\/rlist$)|(\/rlist )/
       response = self.list_pkg(message.text,"rejected")
       return response,nil,nil
-    when /\/subscribe/
+    when /^\/subscribe$/
       response = self.user_subscribe(message.from.id,message.from.username,message.chat.id)
       return response,nil,nil
-    when /\/unsubscribe/
+    when /^\/unsubscribe$/
       response = self.user_unsubscribe(message.from.id)
       return response,nil,nil
-    when /\/stop/
+    when /^\/stop$/
       status = Database.user_set(@@db,"session",message.from.id,false)
       if status == false
         @@logger.error("Cannot set @#{message.from.username}(#{message.from.id})'s session status to false")
