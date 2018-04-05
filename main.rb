@@ -738,52 +738,52 @@ class PAKREQBOT
 
   def self.message_parser(message)
     case message.text
-    when /^\/start$/
+    when /^(\/start$)|(\/start@pakreqBot$)/
       response = self.user_start(message.from.id,message.from.username,message.chat.id)
       return response,nil,nil
-    when /^\/help$/
+    when /^(\/help$)|(\/help@pakreqBot$)/
       response = self.display_help
       return response,nil,nil
-    when /^(\/pakreq$)|(\/pakreq )/
+    when /^(\/pakreq$)|(\/pakreq )|(\/pakreq@pakreqBot)/
       response = self.new_pakreq(message.text,message.from.username,message.from.id)
       return response
-    when /^(\/updreq$)|(\/updreq )/
+    when /^(\/updreq$)|(\/updreq )|(\/updreq@pakreqBot)/
       response = self.new_updreq(message.text,message.from.username,message.from.id)
       return response
-    when /^(\/optreq$)|(\/optreq )/
+    when /^(\/optreq$)|(\/optreq )|(\/optreq@pakreqBot)/
       response = self.new_optreq(message.text,message.from.username,message.from.id)
       return response
-    when /^(\/claim$)|(\/claim )/
+    when /^(\/claim$)|(\/claim )|(\/claim@pakreqBot)/
       response = self.claim_pkg(message.text,message.from.username,message.from.id)
       return response
-    when /^(\/unclaim$)|(\/unclaim )/
+    when /^(\/unclaim$)|(\/unclaim )|(\/unclaim@pakreqBot)/
       response = self.unclaim_pkg(message.text,message.from.username,message.from.id)
       return response
-    when /^(\/set_eta$)|(\/set_eta )/
+    when /^(\/set_eta$)|(\/set_eta )|(\/set_eta@pakreqBot)/
       response = self.set_eta(message.text,message.from.id)
       return response
-    when /^(\/done$)|(\/done )/
+    when /^(\/done$)|(\/done )|(\/done@pakreqBot)/
       response = self.mark_done(message.text,message.from.id)
       return response
-    when /^(\/reject$)|(\/reject )/
+    when /^(\/reject$)|(\/reject )|(\/reject@pakreqBot)/
       response = self.reject_pkg(message.text,message.from.username,message.from.id)
       return response
-    when /^(\/list$)|(\/list )/
+    when /^(\/list$)|(\/list )|(\/list@pakreqBot)/
       response = self.list_pkg(message.text,"req")
       return response,nil,nil
-    when /^(\/dlist$)|(\/dlist )/
+    when /^(\/dlist$)|(\/dlist )|(\/dlist@pakreqBot)/
       response = self.list_pkg(message.text,"done")
       return response,nil,nil
-    when /^(\/rlist$)|(\/rlist )/
+    when /^(\/rlist$)|(\/rlist )|(\/rlist@pakreqBot)/
       response = self.list_pkg(message.text,"rejected")
       return response,nil,nil
-    when /^\/subscribe$/
+    when /^(\/subscribe$)|(\/subscribe@pakreqBot)/
       response = self.user_subscribe(message.from.id,message.from.username,message.chat.id)
       return response,nil,nil
-    when /^\/unsubscribe$/
+    when /^(\/unsubscribe$)|(\/unsubscribe@pakreqBot)/
       response = self.user_unsubscribe(message.from.id)
       return response,nil,nil
-    when /^\/stop$/
+    when /^\/stop$|(\/stop@pakreqBot)/
       status = Database.user_set(@@db,"session",message.from.id,false)
       if status == false
         @@logger.error("Cannot set @#{message.from.username}(#{message.from.id})'s session status to false")
