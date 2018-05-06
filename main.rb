@@ -623,12 +623,12 @@ class PAKREQBOT
             return "<b>Failed to subscribe. Please contact the bot admin.</b>"
           end
         elsif (user_id == arr[0]) and (arr[3] != 1)
-          return "<b>Due to the limitation of Telegram Bot API, bots <b>CANNOT</b> start chat with user directly. Please send <code>/start</code> to this bot.</b>"
+          return "Due to the limitation of Telegram Bot API, bots <b>CANNOT</b> start chat with user directly. Please send <code>/start</code> to this bot."
         end
       end
     end
     if user_id != chat_id
-      return "<b>Due to the limitation of Telegram Bot API, bots <b>CANNOT</b> start chat with user directly. Please send <code>/start</code> to this bot.</b>"
+      return "Due to the limitation of Telegram Bot API, bots <b>CANNOT</b> start chat with user directly. Please send <code>/start</code> to this bot."
     else
       status = Database.user_reg(@@db,user_id,user_username)
       if status == false
