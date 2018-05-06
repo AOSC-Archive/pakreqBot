@@ -733,7 +733,7 @@ class PAKREQBOT
     response = response + "<code>/dlist [package]</code> - List done requests.\n"
     response = response + "<code>/rlist [package]</code> - List rejected requests.\n"
     response = response + "<code>/subscribe</code> - Subscribe.\n"
-    response = response + "<code>/unsubcribe</code> - Unsubscribe.\n"
+    response = response + "<code>/unsubscribe</code> - Unsubscribe.\n"
     response = response + "<code>/help</code> - Show this help message."
     return response
   end
