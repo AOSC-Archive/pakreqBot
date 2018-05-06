@@ -657,13 +657,15 @@ class PAKREQBOT
       @@logger.error("Unable to read database.")
       return "<b>Error read user database, please contact the bot admin.</b>"
     end
-    users[0].map do |arr|
-      if user_id == arr[0]
-        status = Database.user_set(@@db,"subscribe",user_id,false)
-        if status == true
-          return "<b>Successfully unsubscribed.</b>"
-        else
-          return "<b>Unsubscribe failed. Please contact the bot admin.</b>"
+    if users[0] != nil
+      users[0].map do |arr|
+        if user_id == arr[0]
+          status = Database.user_set(@@db,"subscribe",user_id,false)
+          if status == true
+            return "<b>Successfully unsubscribed.</b>"
+          else
+            return "<b>Unsubscribe failed. Please contact the bot admin.</b>"
+          end
         end
       end
     end
