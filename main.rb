@@ -582,9 +582,9 @@ class PAKREQBOT
               reason = "<Unknown>"
             end
             if packager_username == nil
-              packager = "ID: #{arr[4]}"
+              packager = "ID: #{packager_id}"
             else
-              packager = "@#{arr[3]} (#{arr[4]})"
+              packager = "@#{packager_username} (#{packager_id})"
             end
             category = self.string_escape(category)
             pkgname = self.string_escape(message[1])
