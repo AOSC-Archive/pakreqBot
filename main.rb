@@ -801,7 +801,12 @@ class PAKREQBOT
     Telegram::Bot::Client.run(@@token) do |bot|
       bot.listen do |message|
         @@logger.info("Got a message from @#{message.from.username}: #{message.text}")
-        response = self.message_parser(message)
+        response = nil, nil, nil
+        message.entities.each do |entity|
+          if entity.type == "bot_command" && entity.offset == 0
+            response = self.message_parser(message)
+          end
+        end
         if !(response[0] == nil) and !(response[0] == "")
           @@logger.info("Response length: #{response[0].length}")
         end
