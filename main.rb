@@ -238,19 +238,23 @@ class PAKREQBOT
         when "rejected"
           response = "Rejected requests:\n\n"
         end
-        pkglist[0].map do |arr|
-          case arr[2]
-          when 1
-            category = "pakreq"
-          when 2
-            category = "updreq"
-          when 3
-            category = "optreq"
+        for i in 0..9
+        #pkglist[0].map do |arr|
+          if pkglist[0][i] != [] && pkglist[i] != nil
+            case pkglist[0][i][2]
+            when 1
+              category = "pakreq"
+            when 2
+              category = "updreq"
+            when 3
+              category = "optreq"
+            end
+            pkgname = self.string_escape(pkglist[0][i][0])
+            description = self.string_escape(pkglist[0][i][1])
+            response = response + "<b>#{pkgname}</b> (<i>#{category}</i>) : #{description}\n"
           end
-          pkgname = self.string_escape(arr[0])
-          description = self.string_escape(arr[1])
-          response = response + "<b>#{pkgname}</b> (<i>#{category}</i>) : #{description}\n"
         end
+        response = response + "\nPlease visit https://pakreq.v2bv.net for the full list."
         return response
       elsif message.length == 2
         response = ""
