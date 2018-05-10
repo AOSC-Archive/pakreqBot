@@ -239,8 +239,7 @@ class PAKREQBOT
           response = "Rejected requests:\n\n"
         end
         for i in 0..9
-        #pkglist[0].map do |arr|
-          if pkglist[0][i] != [] && pkglist[i] != nil
+          if pkglist[0][i] != [] && pkglist[0][i] != nil
             case pkglist[0][i][2]
             when 1
               category = "pakreq"
