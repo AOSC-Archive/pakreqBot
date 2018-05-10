@@ -211,7 +211,7 @@ class PAKREQBOT
     return "Successfully added to the <i>optreq</i> listing.",notification,nil
   end
 
-  def self.list_pkg(message,table)
+  def self.list_pkg(message,table,id)
     message = message.split
     pkglist = Database.pkg_list(@@db,table)
     if pkglist[1] == false
@@ -256,71 +256,75 @@ class PAKREQBOT
         response = response + "\nPlease visit https://pakreq.v2bv.net for the full list."
         return response
       elsif message.length == 2
-        response = ""
-        pkglist[0].map do |arr|
-          if arr[0] == message[1]
-            if (arr[4] == nil)
-              packager = "<Nobody>"
-            else
-              if arr[3] == nil
-                packager = "ID: ##{arr[4]}"
+        if id > 0
+          response = ""
+          pkglist[0].map do |arr|
+            if arr[0] == message[1]
+              if (arr[4] == nil)
+                packager = "<Nobody>"
               else
-                packager = "@#{arr[3]} (#{arr[4]})"
+                if arr[3] == nil
+                  packager = "ID: ##{arr[4]}"
+                else
+                  packager = "@#{arr[3]} (#{arr[4]})"
+                end
               end
-            end
-            if arr[5] == nil
-              requester = "ID: ##{arr[6]}"
-            else
-              requester = "@#{arr[5]} (#{arr[6]})"
-            end
-            case arr[2]
-            when 1
-              category = "pakreq"
-            when 2
-              category = "updreq"
-            when 3
-              category = "optreq"
-            end
-            pkgname = self.string_escape(arr[0])
-            description = self.string_escape(arr[1])
-            category = self.string_escape(category)
-            packager = self.string_escape(packager)
-            requester = self.string_escape(requester)
-            date = self.string_escape(arr[7])
-            response = response + "Details of <b>#{pkgname}:</b>\n\n"
-            response = response + "<b>Package name:</b> #{pkgname}\n"
-            response = response + "<b>Description:</b> #{description}\n"
-            response = response + "<b>Type:</b> <i>#{category}</i>\n"
-            response = response + "<b>Packager:</b> #{packager}\n"
-            response = response + "<b>Requestee:</b> #{requester}\n"
-            response = response + "<b>Date:</b> #{date}\n"
-            if table == "req"
-              if arr[8] == nil
-                eta = "<Unknown>"
+              if arr[5] == nil
+                requester = "ID: ##{arr[6]}"
               else
-                eta = "#{arr[8]}"
+                requester = "@#{arr[5]} (#{arr[6]})"
               end
-              eta = self.string_escape(eta)
-              response = response + "<b>ETA:</b> #{eta}"
-            end
-            if table == "rejected"
-              @@logger.info("\"#{arr[8]}\"")
-              if (arr[8] == nil) or (arr[8] == "nil") or (arr[8] == "") or (arr[8] == " ")
-                reason = "<Unknown>"
-              else
-                reason = arr[8]
+              case arr[2]
+              when 1
+                category = "pakreq"
+              when 2
+                category = "updreq"
+              when 3
+                category = "optreq"
               end
-              reason = self.string_escape(reason)
-              response = response + "<b>Reason:</b> #{reason}\n\n"
+              pkgname = self.string_escape(arr[0])
+              description = self.string_escape(arr[1])
+              category = self.string_escape(category)
+              packager = self.string_escape(packager)
+              requester = self.string_escape(requester)
+              date = self.string_escape(arr[7])
+              response = response + "Details of <b>#{pkgname}:</b>\n\n"
+              response = response + "<b>Package name:</b> #{pkgname}\n"
+              response = response + "<b>Description:</b> #{description}\n"
+              response = response + "<b>Type:</b> <i>#{category}</i>\n"
+              response = response + "<b>Packager:</b> #{packager}\n"
+              response = response + "<b>Requestee:</b> #{requester}\n"
+              response = response + "<b>Date:</b> #{date}\n"
+              if table == "req"
+                if arr[8] == nil
+                  eta = "<Unknown>"
+                else
+                  eta = "#{arr[8]}"
+                end
+                eta = self.string_escape(eta)
+                response = response + "<b>ETA:</b> #{eta}"
+              end
+              if table == "rejected"
+                @@logger.info("\"#{arr[8]}\"")
+                if (arr[8] == nil) or (arr[8] == "nil") or (arr[8] == "") or (arr[8] == " ")
+                  reason = "<Unknown>"
+                else
+                  reason = arr[8]
+                end
+                reason = self.string_escape(reason)
+                response = response + "<b>Reason:</b> #{reason}\n\n"
+              end
             end
           end
-        end
-        if (response != nil) and (response != "")
-          return response
-        else
+          if (response != nil) and (response != "")
+            return response
+          else
+            return "<b>Invalid request.</b>"
+          end
           return "<b>Invalid request.</b>"
+        else
+          return "<b>Showing details is not allowed in groups.</b>"
         end
-        return "<b>Invalid request.</b>"
       else
         return "<b>Invalid request.</b>"
       end
@@ -774,13 +778,13 @@ class PAKREQBOT
       response = self.reject_pkg(message.text,message.from.username,message.from.id)
       return response
     when /^\/list$|^\/list\s(.*)|^\/list@pakreqBot\s(.*)|^\/list@pakreqBot$/
-      response = self.list_pkg(message.text,"req")
+      response = self.list_pkg(message.text,"req",message.chat.id)
       return response,nil,nil
     when /^\/dlist$|^\/dlist\s(.*)|^\/dlist@pakreqBot\s(.*)|^\/dlist@pakreqBot$/
-      response = self.list_pkg(message.text,"done")
+      response = self.list_pkg(message.text,"done",message.chat.id)
       return response,nil,nil
     when /^\/rlist$|^\/rlist\s(.*)|^\/rlist@pakreqBot\s(.*)|^\/rlist@pakreqBot$/
-      response = self.list_pkg(message.text,"rejected")
+      response = self.list_pkg(message.text,"rejected",message.chat.id)
       return response,nil,nil
     when /^\/subscribe$|^\/subscribe\s(.*)|^\/subscribe@pakreqBot\s(.*)|^\/subscribe@pakreqBot$/
       response = self.user_subscribe(message.from.id,message.from.username,message.chat.id)
