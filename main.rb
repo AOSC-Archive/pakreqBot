@@ -367,7 +367,7 @@ class PAKREQBOT
               packager = self.string_escape(packager)
               notification = "<i>#{category}</i> <b>#{pkgname}</b> claimed by #{packager}."
               notification_requester = Array[arr[6],"Your "+notification]
-              return "Successfully claimed request \"<b>#{pkgname}</b>\".\n\n#{self.list_pkg("/list@pakreqBot #{arr[0]}","req")}",notification,notification_requester
+              return "Successfully claimed request \"<b>#{pkgname}</b>\".",notification,notification_requester
             end
           end
         end
@@ -409,7 +409,7 @@ class PAKREQBOT
             packager = self.string_escape(packager)
             notification = "<i>#{category}</i> <b>#{pkgname}</b> claimed by #{packager}."
             notification_requester = Array[arr[6],"Your "+notification]
-            return "Successfully claimed <i>#{category}</i> <b>#{pkgname}</b>.\n\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
+            return "Successfully claimed <i>#{category}</i> <b>#{pkgname}</b>.",notification,notification_requester
           end
         end
       end
@@ -454,7 +454,7 @@ class PAKREQBOT
               packager = self.string_escape(packager)
               notification = "#{category} #{pkgname} unclaimed by #{packager}"
               notification_requester = Array[arr[6],"Your "+notification]
-              return "Successfully unclaimed <i>#{category}</i> <b>#{message[1]}</b>.\n\n#{self.list_pkg("/list@pakreqBot #{message[1]}","req")}",notification,notification_requester
+              return "Successfully unclaimed <i>#{category}</i> <b>#{message[1]}</b>.",notification,notification_requester
             end
           else
             return "<b>ONLY</b> the people who claimed this package can unclaim it.",nil,nil
